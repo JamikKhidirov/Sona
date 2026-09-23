@@ -37,6 +37,7 @@ include(
 )
 
 include(
+    ":core:data:alarms",
     ":core:data:apps",
     ":core:data:battery",
     ":core:data:bluetooth",
