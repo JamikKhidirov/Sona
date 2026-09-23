@@ -68,6 +68,11 @@ include(
 )
 
 include(
+    "core:network:firebase:auth",
+    "core:network:supabase:auth",
+    )
+
+include(
     ":feature",
     ":feature:comments",
     ":feature:detailmusic",
