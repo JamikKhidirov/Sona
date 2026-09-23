@@ -85,6 +85,7 @@ include(
     ":feature:favorites",
     ":feature:home",
     ":feature:musiclist",
+    ":feature:navigation",
     ":feature:player",
     ":feature:profile",
     ":feature:searchmusic",
