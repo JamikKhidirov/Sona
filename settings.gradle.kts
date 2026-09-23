@@ -24,3 +24,25 @@ dependencyResolutionManagement {
 
 rootProject.name = "Sona"
 include(":app")
+include(
+    ":core",
+    ":core:cache",
+    ":core:camera",
+    ":core:common",
+    ":core:data",
+    ":core:network",
+    ":core:uikit"
+)
+include(
+    ":feature",
+    ":feature:comments",
+    ":feature:detailmusic",
+    ":feature:favorits",
+    ":feature:home",
+    ":feature:musiclist",
+    ":feature:player",
+    ":feature:profile",
+    ":feature:searchmusic",
+    "feature:settings",
+    ":feature:splashscreen",
+    )
