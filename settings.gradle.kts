@@ -31,7 +31,6 @@ include(":app")
 
 // core
 include(":core")
-include(":core:common")
 include(":core:data")
 include(":core:network")
 include(":core:uikit")

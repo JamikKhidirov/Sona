@@ -138,7 +138,26 @@ interface ApiUserService {
     suspend fun <T> getJWTSubscribeObj(): Response<T>
 
 
+    @GET("users/{id}")
+    suspend fun <T> getUserById(
+        @Path("id") id: String
+    ): Response<T>
 
+
+    @GET("users/{id}/albums")
+    suspend fun <T> getAlbomUserById(
+        @Path("id") id: String,
+        //Количество элементов, которые нужно пропустить. Полезно для разбивки на страницы (номер страницы * лимит)
+        @Query("offset") offset: Int? = null,
+        //Количество элементов для выборки
+        @Query("limit") limit: Int? = null,
+        //Идентификатор пользователя, отправляющего запрос
+        @Query("user_id") user_id: String? = null,
+        //Метод сортировки нужно новый создать
+        @Query("sort_method") sort_method: SortMethodUser? = null,
+        //Фильтрация альбомов по названию
+        @Query("query") query: String? = null
+    ): Response<T>
 
 
 }
