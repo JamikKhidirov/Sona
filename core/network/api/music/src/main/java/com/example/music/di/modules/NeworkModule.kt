@@ -17,7 +17,7 @@ import javax.inject.Singleton
 @Module
 object NeworkModule {
 
-    private const val BASE_URL = "https://api.audius.co/v1"
+    private const val BASE_URL = "https://api.audius.co/v1/"
 
 
     @Provides
