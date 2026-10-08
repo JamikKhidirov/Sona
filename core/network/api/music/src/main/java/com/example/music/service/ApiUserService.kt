@@ -1,8 +1,12 @@
 package com.example.music.service
 
-import com.example.music.data.FilterTracks
-import com.example.music.data.SortDirection
-import com.example.music.data.SortMethod
+import com.example.music.data.user.FilterTracks
+import com.example.music.data.user.FilterTracs
+import com.example.music.data.user.SortAi
+import com.example.music.data.user.SortDirection
+import com.example.music.data.user.SortMethod
+import com.example.music.data.user.SortMethodUser
+import com.google.gson.annotations.SerializedName
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -71,6 +75,67 @@ interface ApiUserService {
 
     ): Response<T>
 
+
+    /*
+    Получает треки, созданные искусственным интеллектом
+    и привязанные к пользователю, по его хешу
+     */
+    @GET("users/handle/{handle}/tracks/ai_attributed")
+    suspend fun <T> getAiGeneratesTracs(
+        //Хеш пользователя (обязательное поле)
+        @Path("handle") handle: String,
+        //Количество элементов, которые нужно пропустить.
+        // Полезно для разбивки на страницы (номер страницы * лимит)
+        @Query("offset") offer: Int? = null,
+
+        //Идентификатор пользователя, отправляющего запрос
+        @Query("_id") id: String? = null,
+
+        //[Устаревшее] Поле для сортировки
+        @Query("sort") sort: SortAi? = null,
+
+        //Запрос фильтра
+        @Query("query") query: String? = null,
+
+        //Метод сортировки
+        @Query("sort_method") sort_method: SortMethod? = null,
+
+        //Направление сортировки
+        @Query("sort_direction") sort_direction: SortDirection? = null,
+
+        //Фильтр по общедоступным дорожкам
+        @Query("filter_tracks") filter_tracks: FilterTracs? = null
+
+    ): Response<T>
+
+
+    @GET("users/search")
+    suspend fun <T> searchUserQuery(
+        /*
+        Количество элементов, которые нужно пропустить.
+        Полезно для разбивки на страницы (номер страницы * лимит)
+         */
+        @Query("offset") offset: Int? = null,
+        //Количество элементов для выборки
+        @Query("limit") limit: Int? = null,
+        //Поисковый запрос
+        @Query("query") query: String? = null,
+
+        //Жанры для фильтрации
+        @Query("genre") genre: List<String>,
+
+        //Метод сортировки
+        @Query("sort_method") sort_method: SortMethodUser? = null,
+
+        //Показывать в результатах поиска только верифицированных пользователей
+        @Query("is_verified") is_verified: String? = null
+    ): Response<T>
+
+
+
+    //Проверьте, был ли данный токен jwt ID подписан субъектом (пользователем) в полезной нагрузке
+    @GET("users/verify_token")
+    suspend fun <T> getJWTSubscribeObj(): Response<T>
 
 
 

@@ -1,13 +1,14 @@
-package com.example.music.data
+package com.example.music.data.user
 
 import com.google.gson.annotations.SerializedName
 
 
-enum class FilterTracks {
+enum class FilterTracs {
+
     @SerializedName("all")
     ALL,
+
+
     @SerializedName("public")
-    PUBLIC,
-    @SerializedName("unlisted")
-    UNLISTED
+    PUBLIC
 }
