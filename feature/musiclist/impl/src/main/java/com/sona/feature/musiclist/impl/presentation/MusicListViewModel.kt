@@ -6,8 +6,8 @@ import com.sona.core.audio.AudioPlayer
 import com.sona.core.common.domain.usecase.GetArtistTracks
 import com.sona.core.common.domain.usecase.GetPlaylistTracks
 import com.sona.core.common.domain.usecase.GetTrendingTracks
-import com.sona.core.common.domain.usecase.ObserveFavoriteIds
-import com.sona.core.common.domain.usecase.ToggleFavorite
+import com.sona.core.common.domain.usecase.library.ObserveFavoriteIds
+import com.sona.core.common.domain.usecase.library.ToggleFavorite
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

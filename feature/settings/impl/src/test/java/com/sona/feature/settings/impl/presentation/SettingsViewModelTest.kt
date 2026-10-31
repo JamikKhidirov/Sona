@@ -3,9 +3,9 @@ package com.sona.feature.settings.impl.presentation
 import com.sona.core.common.domain.model.AppSettings
 import com.sona.core.common.domain.repository.LibraryRepository
 import com.sona.core.common.domain.repository.SettingsRepository
-import com.sona.core.common.domain.usecase.ClearLibrary
+import com.sona.core.common.domain.usecase.library.ClearLibrary
 import com.sona.core.common.domain.usecase.ObserveSettings
-import com.sona.core.common.domain.usecase.SetApiToken
+import com.sona.core.common.domain.usecase.settings.SetApiToken
 import com.sona.core.common.domain.usecase.SetThemeMode
 import com.sona.core.common.model.ThemeMode
 import com.sona.core.common.model.Track

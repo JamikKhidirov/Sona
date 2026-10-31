@@ -3,8 +3,8 @@ package com.sona.feature.player.impl.presentation
 import com.sona.core.audio.AudioPlayer
 import com.sona.core.audio.PlayerState
 import com.sona.core.common.domain.repository.LibraryRepository
-import com.sona.core.common.domain.usecase.ObserveFavoriteIds
-import com.sona.core.common.domain.usecase.ToggleFavorite
+import com.sona.core.common.domain.usecase.library.ObserveFavoriteIds
+import com.sona.core.common.domain.usecase.library.ToggleFavorite
 import com.sona.core.common.model.Artist
 import com.sona.core.common.model.RepeatMode
 import com.sona.core.common.model.Track

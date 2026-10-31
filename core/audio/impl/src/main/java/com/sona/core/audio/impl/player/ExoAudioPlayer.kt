@@ -1,7 +1,6 @@
 package com.sona.core.audio.impl.player
 
 import androidx.core.net.toUri
-import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -10,7 +9,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.sona.core.audio.AudioPlayer
 import com.sona.core.audio.PlayerState
-import com.sona.core.common.domain.usecase.AddRecentlyPlayed
+import com.sona.core.common.domain.usecase.library.AddRecentlyPlayed
 import com.sona.core.common.model.RepeatMode
 import com.sona.core.common.model.Track
 import kotlinx.coroutines.CoroutineScope

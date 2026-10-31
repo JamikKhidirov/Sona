@@ -4,6 +4,14 @@ import com.sona.core.common.domain.model.AppSettings
 import com.sona.core.common.domain.repository.LibraryRepository
 import com.sona.core.common.domain.repository.MusicRepository
 import com.sona.core.common.domain.repository.SettingsRepository
+import com.sona.core.common.domain.usecase.library.AddRecentlyPlayed
+import com.sona.core.common.domain.usecase.library.ClearLibrary
+import com.sona.core.common.domain.usecase.library.ObserveFavoriteIds
+import com.sona.core.common.domain.usecase.library.ObserveFavorites
+import com.sona.core.common.domain.usecase.library.ObserveRecentlyPlayed
+import com.sona.core.common.domain.usecase.library.ToggleFavorite
+import com.sona.core.common.domain.usecase.music.GetCurrentUser
+import com.sona.core.common.domain.usecase.settings.SetApiToken
 import com.sona.core.common.model.Artist
 import com.sona.core.common.model.Playlist
 import com.sona.core.common.model.SearchResult

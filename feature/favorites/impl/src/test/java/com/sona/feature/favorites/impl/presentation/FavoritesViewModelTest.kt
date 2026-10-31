@@ -3,9 +3,9 @@ package com.sona.feature.favorites.impl.presentation
 import com.sona.core.audio.AudioPlayer
 import com.sona.core.audio.PlayerState
 import com.sona.core.common.domain.repository.LibraryRepository
-import com.sona.core.common.domain.usecase.ClearLibrary
-import com.sona.core.common.domain.usecase.ObserveFavorites
-import com.sona.core.common.domain.usecase.ToggleFavorite
+import com.sona.core.common.domain.usecase.library.ClearLibrary
+import com.sona.core.common.domain.usecase.library.ObserveFavorites
+import com.sona.core.common.domain.usecase.library.ToggleFavorite
 import com.sona.core.common.model.Artist
 import com.sona.core.common.model.Track
 import kotlinx.coroutines.ExperimentalCoroutinesApi

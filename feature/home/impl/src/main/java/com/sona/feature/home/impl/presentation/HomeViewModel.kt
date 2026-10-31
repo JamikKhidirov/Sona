@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sona.core.audio.AudioPlayer
 import com.sona.core.common.domain.usecase.GetTrendingTracks
-import com.sona.core.common.domain.usecase.ObserveFavoriteIds
-import com.sona.core.common.domain.usecase.ToggleFavorite
+import com.sona.core.common.domain.usecase.library.ObserveFavoriteIds
+import com.sona.core.common.domain.usecase.library.ToggleFavorite
 import com.sona.core.common.model.Track
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow

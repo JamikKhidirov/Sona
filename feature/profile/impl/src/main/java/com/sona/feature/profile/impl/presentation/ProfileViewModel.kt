@@ -3,9 +3,9 @@ package com.sona.feature.profile.impl.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sona.core.audio.AudioPlayer
-import com.sona.core.common.domain.usecase.GetCurrentUser
-import com.sona.core.common.domain.usecase.ObserveFavorites
-import com.sona.core.common.domain.usecase.ObserveRecentlyPlayed
+import com.sona.core.common.domain.usecase.music.GetCurrentUser
+import com.sona.core.common.domain.usecase.library.ObserveFavorites
+import com.sona.core.common.domain.usecase.library.ObserveRecentlyPlayed
 import com.sona.core.common.domain.usecase.ObserveSettings
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach

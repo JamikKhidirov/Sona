@@ -3,9 +3,9 @@ package com.sona.feature.searchmusic.impl.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sona.core.audio.AudioPlayer
-import com.sona.core.common.domain.usecase.ObserveFavoriteIds
+import com.sona.core.common.domain.usecase.library.ObserveFavoriteIds
 import com.sona.core.common.domain.usecase.SearchCatalog
-import com.sona.core.common.domain.usecase.ToggleFavorite
+import com.sona.core.common.domain.usecase.library.ToggleFavorite
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow

@@ -33,8 +33,8 @@ fun greetingForNow(): String = greetingForHour(Calendar.getInstance().get(Calend
 
 /** Pure variant of [greetingForNow] so the buckets can be unit-tested. */
 fun greetingForHour(hour: Int): String = when (hour) {
-    in 5..11 -> "Good morning"
-    in 12..17 -> "Good afternoon"
-    in 18..22 -> "Good evening"
-    else -> "Late night sounds"
+    in 5..11 -> "Доброе утро"
+    in 12..17 -> "Добрый день"
+    in 18..22 -> "Добрый вечер"
+    else -> "Звуки поздней ночи"
 }

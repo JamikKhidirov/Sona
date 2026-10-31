@@ -6,8 +6,8 @@ import com.sona.core.common.domain.repository.LibraryRepository
 import com.sona.core.common.domain.repository.MusicRepository
 import com.sona.core.common.domain.usecase.GetTrack
 import com.sona.core.common.domain.usecase.GetTrendingTracks
-import com.sona.core.common.domain.usecase.ObserveFavorites
-import com.sona.core.common.domain.usecase.ToggleFavorite
+import com.sona.core.common.domain.usecase.library.ObserveFavorites
+import com.sona.core.common.domain.usecase.library.ToggleFavorite
 import com.sona.core.common.model.Artist
 import com.sona.core.common.model.Playlist
 import com.sona.core.common.model.SearchResult
