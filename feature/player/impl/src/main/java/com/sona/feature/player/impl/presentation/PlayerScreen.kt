@@ -93,9 +93,9 @@ fun PlayerScreen(
                     )
                 }
                 EmptyState(
-                    title = "Nothing playing",
-                    message = "Pick a track from Home, Search or your favorites.",
-                    actionText = "Go back",
+                    title = "Ничего не играло",
+                    message = "Выберите трек из \"Дома\", \"Поиска\" или \"Избранного\".",
+                    actionText = "Назад",
                     onAction = onBack,
                     modifier = Modifier.weight(1f),
                 )
@@ -122,12 +122,12 @@ fun PlayerScreen(
                 Spacer(Modifier.weight(1f))
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "NOW PLAYING",
+                        text = "СЕЙЧАС ИГРАЮ",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary,
                     )
                     Text(
-                        text = "Sona radio",
+                        text = "Радио SONA",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -257,7 +257,7 @@ fun PlayerScreen(
                 }
                 Spacer(Modifier.size(12.dp))
                 Text(
-                    text = if (state.player.isBuffering) "Buffering…" else "Streaming from Audius",
+                    text = if (state.player.isBuffering) "Загрузка..." else "",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
