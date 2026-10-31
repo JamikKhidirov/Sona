@@ -1,5 +1,6 @@
 package com.sona.core.ui.component
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -32,11 +33,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.sona.core.ui.R
 
 @Composable
 fun SectionHeader(
@@ -90,32 +91,23 @@ fun SonaChip(
     }
 }
 
+/**
+ * The Sona avatar — the same gradient tile with a music note that the launcher
+ * icon uses. Every screen (splash, home header, profile) shows this mark so the
+ * brand never drifts between the app icon and the in-app logo.
+ */
 @Composable
 fun SonaLogo(
     modifier: Modifier = Modifier,
     size: Dp = 48.dp,
 ) {
-    Box(
+    Image(
+        painter = painterResource(R.drawable.ic_sona_mark),
+        contentDescription = "Sona",
         modifier = modifier
             .size(size)
-            .clip(RoundedCornerShape(size * 0.32f))
-            .background(
-                Brush.linearGradient(
-                    listOf(
-                        MaterialTheme.colorScheme.primary,
-                        MaterialTheme.colorScheme.secondary,
-                    ),
-                ),
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = "S",
-            color = MaterialTheme.colorScheme.onPrimary,
-            fontWeight = FontWeight.Black,
-            fontSize = (size.value * 0.52f).sp,
-        )
-    }
+            .clip(RoundedCornerShape(size * 0.32f)),
+    )
 }
 
 @Composable

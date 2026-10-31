@@ -8,6 +8,8 @@
 
 ![Navigation transition](assets/nav-transition.svg)
 
+![Splash avatar](assets/splash.svg)
+
 ![Playing indicator](assets/equalizer.svg)
 
 ---
@@ -22,7 +24,7 @@
 - [Mini player](#mini-player)
 - [Очередь воспроизведения](#очередь-воспроизведения)
 - [Snackbar и диалоги](#snackbar-и-диалоги)
-- [Splash](#splash)
+- [Splash и аватар приложения](#splash-и-аватар-приложения)
 - [Тайминги](#тайминги)
 - [Производительность](#производительность)
 - [Как изменить анимации](#как-изменить-анимации)
@@ -45,7 +47,10 @@
 | Прогресс плеера | `PlayerScreen` | `Slider` + drag state | интерактивно | — |
 | Очередь | `PlayerScreen` | `ModalBottomSheet` | системная | по открытию |
 | Snackbar | все route-экраны | `SnackbarHost` | системная | по событию |
-| Splash | `SplashScreen` | `delay` + переход | 1 100 ms | один раз |
+| Splash: вход аватара | `SplashBrand` | `animateFloatAsState` + `spring` | ~600 ms | один раз |
+| Splash: дыхание аватара | `SplashBrand` | `rememberInfiniteTransition` | 1 600 ms | бесконечно, `Reverse` |
+| Splash: свечение | `SplashBrand` | радиальный градиент + `graphicsLayer` | 1 600 ms | бесконечно, `Reverse` |
+| Splash: таймер | `SplashScreen` | `delay` + переход | 1 100 ms | один раз |
 | Загрузка | `LoadingState` / `CircularProgressIndicator` | Material 3 | бесконечно | пока грузится |
 
 ---
@@ -247,21 +252,171 @@ if (showQueue) {
 
 ---
 
-## Splash
+## Splash и аватар приложения
 
-Файл: `feature/splashscreen/impl/.../SplashScreen.kt`
+Файлы:
+
+- `feature/splashscreen/impl/.../SplashScreen.kt` — таймер.
+- `feature/splashscreen/impl/.../components/SplashBrand.kt` — аватар и анимации.
+- `core/ui/src/main/res/drawable/ic_sona_mark.xml` — сам аватар.
+- `app/src/main/res/drawable/ic_launcher_foreground.xml` — тот же знак для иконки.
+
+![Splash avatar](assets/splash.svg)
+
+### Что видит пользователь
+
+1. Фирменный градиентный фон (`SonaBackground`).
+2. **Аватар приложения** — тот же градиентный квадрат с белой нотой, что и у
+   иконки на домашнем экране. Он «впрыгивает» из 82 % до 100 %.
+3. Через 250 ms проявляется надпись `SONA` с трекингом 6 sp.
+4. Аватар начинает едва заметно «дышать» (1 → 1.045 → 1) с периодом 1.6 s.
+5. Позади аватара пульсирует радиальное свечение — тот же ритм, но с
+   прозрачностью 0.55 → 0.85.
+6. Через 1.1 s `onFinished()` уводит на Home; splash удаляется из back stack.
+
+### Вход: пружина
 
 ```kotlin
-LaunchedEffect(Unit) {
-    delay(1_100L)
-    latestOnFinished.value()
+val enterScale by animateFloatAsState(
+    targetValue = if (entered) 1f else 0.82f,
+    animationSpec = spring(
+        dampingRatio = 0.62f,
+        stiffness = Spring.StiffnessLow,
+    ),
+    label = "avatarEnterScale",
+)
+
+val enterAlpha by animateFloatAsState(
+    targetValue = if (entered) 1f else 0f,
+    animationSpec = tween(durationMillis = 420),
+    label = "avatarEnterAlpha",
+)
+```
+
+| Параметр | Значение | Зачем |
+|---|---|---|
+| Начальный масштаб | `0.82` | Заметный, но не «прыжок из точки» |
+| `dampingRatio` | `0.62` | Один мягкий отскок, без дребезга |
+| `stiffness` | `StiffnessLow` | Медленная, «дорогая» пружина |
+| Alpha | `0 → 1` за 420 ms | Появление без резкой вспышки |
+| Задержка старта | 1 кадр (`LaunchedEffect`) | Compose успевает зафиксировать начальное состояние |
+
+`animateFloatAsState` запускается один раз: после того как `entered` стал
+`true`, повторных входов нет. Пружина не блокирует таймер — `delay(1_100L)`
+идёт параллельно.
+
+### Дыхание: бесконечный цикл
+
+```kotlin
+val breathe = rememberInfiniteTransition(label = "avatarBreathe")
+val pulse by breathe.animateFloat(
+    initialValue = 1f,
+    targetValue = 1.045f,
+    animationSpec = infiniteRepeatable(
+        animation = tween(durationMillis = 1_600, easing = FastOutSlowInEasing),
+        repeatMode = RepeatMode.Reverse,
+    ),
+    label = "avatarPulse",
+)
+```
+
+- Амплитуда **4.5 %** — на 108 dp это ≈ 5 dp, заметно только боковым зрением.
+- `RepeatMode.Reverse` убирает рывок в конце цикла.
+- `FastOutSlowInEasing` делает движение «дышащим», а не линейным.
+- Эквалайзер в списках использует 420–640 ms; splash намеренно медленнее
+  (1 600 ms), чтобы не конкурировать с ним за внимание.
+
+### Свечение
+
+```kotlin
+Box(
+    modifier = Modifier
+        .size(150.dp)
+        .graphicsLayer {
+            scaleX = enterScale * pulse
+            scaleY = enterScale * pulse
+            alpha = enterAlpha * 0.55f
+        }
+        .clip(CircleShape)
+        .background(
+            Brush.radialGradient(
+                colors = listOf(
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.55f),
+                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.18f),
+                    Color.Transparent,
+                ),
+            ),
+        ),
+)
+```
+
+Свечение — не размытие и не `blur`: это обычный радиальный градиент на
+150 dp. Такой приём дешевле по GPU и одинаково выглядит на всех API 24+.
+
+### Один аватар на всё приложение
+
+`SonaLogo` больше не рисует букву «S» текстом, а показывает
+`ic_sona_mark` — тот же вектор, что используется в adaptive-иконке:
+
+```kotlin
+@Composable
+fun SonaLogo(modifier: Modifier = Modifier, size: Dp = 48.dp) {
+    Image(
+        painter = painterResource(R.drawable.ic_sona_mark),
+        contentDescription = "Sona",
+        modifier = modifier
+            .size(size)
+            .clip(RoundedCornerShape(size * 0.32f)),
+    )
 }
 ```
 
-- 1.1 секунды показывается логотип, название, слоган и `CircularProgressIndicator`.
-- Затем `NavHost` уводит на Home; splash удаляется из back stack.
-- Переход Splash → Home использует те же `enterTransition` / `exitTransition`,
-  что и остальные экраны.
+| Где | Размер | Скругление |
+|---|---|---|
+| Splash | 108 dp | 32 % (≈ 35 dp) |
+| Home header | 42 dp | 32 % |
+| Launcher icon | adaptive 108 dp | маска системы |
+
+Благодаря одному ресурсу иконка приложения, splash и шапка Home никогда не
+разъедутся по цвету или форме.
+
+### Таймлайн splash
+
+```mermaid
+gantt
+    title Splash: 0 → 1 100 ms
+    dateFormat X
+    axisFormat %L ms
+    section Аватар
+    Вход (spring 0.82→1)      :a1, 0, 600
+    Дыхание (1→1.045→1)       :a2, 600, 1100
+    section Текст
+    Fade-in SONA              :b1, 250, 800
+    section Навигация
+    delay(1_100)              :c1, 0, 1100
+    Переход на Home           :c2, 1100, 1360
+```
+
+### Как изменить
+
+| Что | Где | Как |
+|---|---|---|
+| Длительность показа | `SplashScreen.kt` | `delay(1_100L)` → любое значение ≥ 600 ms |
+| Сила отскока | `SplashBrand.kt` | `dampingRatio` 0.5 (больше отскока) … 0.9 (мягче) |
+| Скорость пружины | `SplashBrand.kt` | `Spring.StiffnessLow` → `Medium` / `High` |
+| Амплитуда дыхания | `SplashBrand.kt` | `targetValue = 1.045f` |
+| Период дыхания | `SplashBrand.kt` | `tween(1_600)` |
+| Размер аватара | `SplashBrand.kt` | `SonaLogo(size = 108.dp)` |
+| Сам знак | `core/ui/.../ic_sona_mark.xml` | заменить путь/градиент |
+
+### Accessibility
+
+- Аватар имеет `contentDescription = "Sona"`.
+- Анимации декоративные: если пользователь отключил анимации, splash всё
+  равно покажет аватар и уйдёт на Home через 1.1 s.
+- Нет мигания и частоты выше 3 Гц — безопасно для чувствительных
+  пользователей.
+- Текст `SONA` читается скринридером как часть бренда, слоган — как подпись.
 
 ---
 
@@ -285,6 +440,8 @@ timeline
 | Сдвиг | 1/14 ширины | Направление без «карусели» |
 | Кроссфейд | 220 ms | Совпадает с ритмом навигации |
 | Эквалайзер | 420–640 ms | Живой, но не мигающий |
+| Splash: вход аватара | ~600 ms | Пружина успевает «дышать» до ухода |
+| Splash: дыхание | 1 600 ms | Медленнее эквалайзера, не отвлекает |
 | Splash | 1 100 ms | Успевает показать бренд |
 
 ---

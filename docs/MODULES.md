@@ -151,6 +151,7 @@ DataStore-ключи:
 | `component` | `Artwork`, `TrackRow`, `TrackTile`, `ArtistRow`, `ArtistTile`, `PlaylistRow`, `PlayingIndicator`, `MiniPlayer`, `SonaBackground`, `SonaLogo`, `SonaChip`, `SectionHeader`, `EmptyState`, `ErrorState`, `LoadingState`, `GradientCircleButton`, `CircleIconButton`, `OutlinePill`, `StatPill` |
 | `theme` | `Color.kt`, `Type.kt`, `Shape.kt`, `Theme.kt` (`SonaTheme`) |
 | `format` | `formatDuration`, `formatCount`, `greetingForNow` |
+| `res/drawable` | `ic_sona_mark` — аватар приложения (splash, Home, launcher icon) |
 
 Правило: если компонент нужен **двум и более** фичам — он живёт здесь.
 Если одному — в `feature/*/impl/presentation/components`.
@@ -442,4 +443,4 @@ abstract fun bindExampleViewModel(vm: ExampleViewModel): ViewModel
 
 ---
 
-Дальше: [архитектура](ARCHITECTURE.md) · [экраны](SCREENS.md) · [анимации](ANIMATIONS.md) · [API](API.md) · [сборка](BUILD.md).
+Дальше: [архитектура](ARCHITECTURE.md) · [DI](DI.md) · [экраны](SCREENS.md) · [анимации](ANIMATIONS.md) · [API](API.md) · [сборка](BUILD.md).

@@ -18,11 +18,12 @@
 профиль, настройки, оффлайн-метаданные и живая информация об устройстве.
 
 > **Статус:** собирается в debug и release без устройства. 74 модуля,
-> 9 экранов, 4 доменных API, 28 модулей информации об устройстве.
+> 9 экранов, 4 доменных API, 28 модулей информации об устройстве,
+> 10 unit-тестов (0 падений).
 
 > Документация: [архитектура](docs/ARCHITECTURE.md) · [экраны](docs/SCREENS.md) ·
 > [анимации](docs/ANIMATIONS.md) · [API](docs/API.md) · [модули](docs/MODULES.md) ·
-> [сборка](docs/BUILD.md) · [changelog](CHANGELOG.md)
+> [DI](docs/DI.md) · [сборка](docs/BUILD.md) · [changelog](CHANGELOG.md)
 
 ---
 
@@ -30,6 +31,7 @@
 
 - [Возможности](#возможности)
 - [Экраны](#экраны)
+- [Бренд и splash](#бренд-и-splash)
 - [Навигация](#навигация)
 - [Анимации](#анимации)
 - [Архитектура](#архитектура)
@@ -39,6 +41,7 @@
 - [UI-слой](#ui-слой)
 - [Технологии](#технологии)
 - [Сборка и запуск](#сборка-и-запуск)
+- [Тесты](#тесты)
 - [Версии и теги](#версии-и-теги)
 - [Документация](#документация)
 - [Ограничения](#ограничения)
@@ -58,6 +61,7 @@
 | 🎵 Детали трека | обложка, артист, жанр/настроение, статистика, описание, похожие треки |
 | ⚙️ Настройки | тема (system/light/dark), Audius-токен, очистка библиотеки, информация об устройстве |
 | 📱 Информация об устройстве | 28 модулей: батарея, сеть, Wi-Fi, Bluetooth, датчики, память, приложения и т.д. |
+| 🖼️ Бренд | один аватар `ic_sona_mark` на splash, в шапке Home и в adaptive-иконке запуска |
 | 🎨 Дизайн | своя тема, градиенты, glass-элементы, mini-player, bottom bar |
 
 ---
@@ -77,6 +81,27 @@
 | Settings | `settings` | `feature/settings/impl/.../SettingsScreen.kt` |
 
 Подробно про состояния, интенты и компоненты — в [docs/SCREENS.md](docs/SCREENS.md).
+
+---
+
+## Бренд и splash
+
+![Splash avatar](docs/assets/splash.svg)
+
+Аватар приложения — один вектор `core/ui/src/main/res/drawable/ic_sona_mark.xml`:
+фиолетово-розовый градиент с белой нотой. Он используется:
+
+| Где | Как |
+|---|---|
+| Иконка запуска | `app/src/main/res/drawable/ic_launcher_background.xml` + `ic_launcher_foreground.xml` (adaptive icon) |
+| Splash | `SplashBrand` → `SonaLogo(size = 108.dp)` |
+| Home header | `SonaLogo(size = 42.dp)` |
+
+Splash показывает аватар с пружинным входом (0.82 → 1.0, ~600 ms), затем
+«дыханием» 1 → 1.045 → 1 (1.6 s) и пульсирующим свечением позади. Через
+1.1 s приложение уходит на Home, splash удаляется из back stack.
+
+Полный разбор таймингов и кода — [docs/ANIMATIONS.md](docs/ANIMATIONS.md#splash-и-аватар-приложения).
 
 ---
 
@@ -179,7 +204,7 @@ Sona/
 │   ├── splashscreen/ home/ searchmusic/ favorites/ profile/
 │   ├── detailmusic/ musiclist/ player/ settings/
 │   └── comments/                 # заготовка
-├── docs/                         # ARCHITECTURE, SCREENS, ANIMATIONS, API, MODULES, BUILD
+├── docs/                         # ARCHITECTURE, SCREENS, ANIMATIONS, API, MODULES, DI, BUILD
 ├── gradle/libs.versions.toml     # version catalog
 └── settings.gradle.kts
 ```
@@ -315,6 +340,42 @@ app/build/outputs/apk/release/app-release-unsigned.apk
 
 ---
 
+## Тесты
+
+Короткие unit-тесты на самые хрупкие чистые функции и мапперы — без Android,
+эмулятора и сети.
+
+| Файл | Что проверяет | Тестов |
+|---|---|---|
+| `core/ui/src/test/.../format/FormattersTest.kt` | `formatDuration` (минуты/часы), `formatCount` (K/M/B) | 2 |
+| `core/network/api/music/src/test/.../mapper/AudiusMappersTest.kt` | маппинг `TrackDto` / `UserDto` / `PlaylistDto`, fallback'и, `streamUrl` | 6 |
+
+```bash
+# только эти тесты
+./gradlew :core:ui:testDebugUnitTest :core:network:api:music:testDebugUnitTest
+
+# все unit-тесты проекта
+./gradlew testDebugUnitTest
+
+# проверить, что тестовые исходники компилируются (без запуска)
+./gradlew compileDebugUnitTestKotlin compileDebugAndroidTestKotlin
+```
+
+Результат на момент релиза:
+
+```text
+core:ui                          tests=3  failures=0
+core:network:api:music           tests=7  failures=0
+```
+
+(в каждом модуле остался шаблонный `ExampleUnitTest`, поэтому всего 10 тестов;
+8 из них — содержательные.)
+
+Отчёт HTML: `core/ui/build/reports/tests/testDebugUnitTest/index.html` и
+`core/network/api/music/build/reports/tests/testDebugUnitTest/index.html`.
+
+---
+
 ## Версии и теги
 
 | Тег | Что означает |
@@ -340,6 +401,7 @@ git checkout v1.0.0        # состояние релиза
 | [docs/ANIMATIONS.md](docs/ANIMATIONS.md) | переходы, тайминги, эквалайзер, как менять |
 | [docs/API.md](docs/API.md) | Audius API по доменам, DTO, маппинг, стриминг |
 | [docs/MODULES.md](docs/MODULES.md) | дерево модулей, правила зависимостей, рецепты |
+| [docs/DI.md](docs/DI.md) | Dagger 2: компонент, модули, скоупы, ViewModel, ошибки KSP |
 | [docs/BUILD.md](docs/BUILD.md) | требования, команды, APK, подпись, troubleshooting |
 | [CHANGELOG.md](CHANGELOG.md) | история версий и проверок |
 

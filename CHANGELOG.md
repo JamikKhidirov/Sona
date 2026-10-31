@@ -104,6 +104,13 @@
   `DeviceInfoCard`, `PlayerControls`, `QueueSheet`, `SonaBottomBar`, `SplashBrand`.
 - Анимации: кроссфейд обложек 220 мс, эквалайзер `0.25 → 1` (420/530/640 мс,
   `Reverse`), `animateColorAsState` в bottom bar.
+- **Аватар приложения** `ic_sona_mark` — один градиентный знак с нотой для
+  splash, шапки Home и adaptive-иконки запуска.
+- Splash-анимация: пружинный вход аватара 0.82 → 1.0 (~600 мс), «дыхание»
+  1 → 1.045 → 1 (1.6 s), пульсирующее радиальное свечение.
+- Unit-тесты: `FormattersTest` (длительность, счётчики) и `AudiusMappersTest`
+  (треки, артисты, плейлисты, fallback'и, `streamUrl`) — 8 содержательных
+  тестов, 0 падений.
 
 **Документация**
 
@@ -114,6 +121,8 @@
 - `docs/ANIMATIONS.md` — переходы, тайминги, эквалайзер, как менять.
 - `docs/API.md` — Audius API по доменам, DTO, маппинг, стриминг, ошибки.
 - `docs/MODULES.md` — дерево модулей, правила зависимостей, как добавить фичу.
+- `docs/DI.md` — Dagger 2: компонент, модули по слоям, скоупы, ViewModel
+  multibinding, инъекция в сервис, тестирование графа, ошибки KSP.
 - `docs/BUILD.md` — требования, команды, APK, подпись, troubleshooting.
 - `CHANGELOG.md` — этот файл.
 - Анимированные SVG: `docs/assets/hero.svg`, `nav-transition.svg`, `equalizer.svg`.
@@ -160,6 +169,7 @@
 |---|---|
 | `:core:network:api:music:compileDebugKotlin` | BUILD SUCCESSFUL |
 | `:app:assembleDebug` | BUILD SUCCESSFUL |
+| `:core:ui:testDebugUnitTest :core:network:api:music:testDebugUnitTest` | BUILD SUCCESSFUL, 10 тестов, 0 падений |
 | `compileDebugUnitTestKotlin compileDebugAndroidTestKotlin` | BUILD SUCCESSFUL |
 | `:app:assembleRelease` | BUILD SUCCESSFUL |
 

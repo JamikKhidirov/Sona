@@ -207,17 +207,23 @@ interface AppComponent {
 
 | Модуль | Что даёт |
 |---|---|
+| `AppModule` | `DispatcherProvider`, `@ApplicationScope CoroutineScope` |
 | `NetworkModule` | `Gson`, `HttpLoggingInterceptor`, `OkHttpClient`, `Retrofit` |
 | `ApiModule` | `TrackApi`, `PlaylistApi`, `UserApi`, `SearchApi` |
 | `MusicModule` | `MusicRepositoryImpl` → `MusicRepository` |
-| `CoreDataModule` | `DataStore`, `LibraryRepository`, `SettingsRepository`, `DispatcherProvider` |
-| `AudioModule` | `AudioPlayer`, `ExoPlayer`, MediaSession |
-| `PlayerModule` | `PlayerViewModel`-зависимости, `PlaybackController` |
+| `CoreDataModule` | `LibraryRepository`, `SettingsRepository`, `TokenProvider` |
+| `AudioModule` | `ExoAudioPlayer` → `AudioPlayer` |
+| `PlayerModule` | `ExoPlayer` (singleton, общий для UI и сервиса) |
 | `ViewModelBindingModule` | `@ViewModelKey` для всех ViewModel |
-| `AppModule` | `Context`, application-scope зависимости |
+
+`Context` приходит в граф через `@BindsInstance @ApplicationContext` в
+`AppComponent.Factory`, а не через отдельный провайд.
 
 `SonaViewModelFactory` умеет создавать ViewModel по `@ViewModelKey`, поэтому фичи не зависят
 от app-модуля напрямую.
+
+> Полный разбор — [DI.md](DI.md): скоупы, квалификаторы, multibinding,
+> инъекция в `PlaybackService`, тестирование графа и ошибки KSP.
 
 ---
 

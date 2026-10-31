@@ -218,10 +218,13 @@ Get-ChildItem app\build\outputs\apk -Recurse -Filter *.apk |
 # 4. Приложение целиком
 .\gradlew.bat :app:assembleDebug --console=plain
 
-# 5. Тестовые исходники
+# 5. Unit-тесты (форматтеры, мапперы)
+.\gradlew.bat :core:ui:testDebugUnitTest :core:network:api:music:testDebugUnitTest --console=plain
+
+# 6. Тестовые исходники
 .\gradlew.bat compileDebugUnitTestKotlin compileDebugAndroidTestKotlin --console=plain
 
-# 6. Release
+# 7. Release
 .\gradlew.bat :app:assembleRelease --console=plain
 ```
 
@@ -247,6 +250,7 @@ Get-ChildItem app\build\outputs\apk -Recurse -Filter *.apk |
 |---|---|---|
 | `:core:network:api:music:compileDebugKotlin` | **BUILD SUCCESSFUL** | ~19 s |
 | `:app:assembleDebug` | **BUILD SUCCESSFUL** | ~39 s (инкрементально) |
+| `:core:ui:testDebugUnitTest :core:network:api:music:testDebugUnitTest` | **BUILD SUCCESSFUL**, 10 тестов, 0 падений | ~1 min 36 s |
 | `compileDebugUnitTestKotlin compileDebugAndroidTestKotlin` | **BUILD SUCCESSFUL** | ~52 s |
 | `:app:assembleRelease` | **BUILD SUCCESSFUL** | ~3 min |
 

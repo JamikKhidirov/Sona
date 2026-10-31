@@ -105,11 +105,18 @@ flowchart TD
 Что происходит:
 
 1. `SonaBackground` рисует фирменный градиент.
-2. `SplashBrand` показывает логотип, название и подпись.
-3. Через 1.1 секунды вызывается `onFinished`.
-4. `NavHost` уводит на `home` с `popUpTo(splash) { inclusive = true }` — назад на splash вернуться нельзя.
+2. `SplashBrand` показывает **аватар приложения** — тот же `ic_sona_mark`, что и
+   в launcher-иконке. Аватар входит пружиной (0.82 → 1.0, ~600 ms), затем
+   «дышит» 1 → 1.045 → 1 с периодом 1.6 s; позади пульсирует радиальное
+   свечение.
+3. Через 250 ms проявляется `SONA`, ниже — слоган и `CircularProgressIndicator`.
+4. Через 1.1 секунды вызывается `onFinished`.
+5. `NavHost` уводит на `home` с `popUpTo(splash) { inclusive = true }` — назад на splash вернуться нельзя.
 
-Компоненты: `SonaBackground`, `SplashBrand`.
+Компоненты: `SonaBackground`, `SplashBrand`, `SonaLogo`.
+
+Анимации splash подробно разобраны в
+[docs/ANIMATIONS.md](ANIMATIONS.md#splash-и-аватар-приложения).
 
 ---
 
