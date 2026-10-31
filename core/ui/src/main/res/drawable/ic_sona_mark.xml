@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Sona brand mark: a violet-to-pink gradient tile with a white music note.
+  Used by the in-app logo (SonaLogo), the splash avatar and the adaptive
+  launcher icon foreground, so the brand stays identical everywhere.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Full-bleed gradient background; Compose clips it to a rounded tile. -->
+    <path android:pathData="M0,0h108v108h-108z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0"
+                android:startY="0"
+                android:endX="108"
+                android:endY="108">
+                <item android:color="#7C5CFF" android:offset="0.0" />
+                <item android:color="#C44DFF" android:offset="0.55" />
+                <item android:color="#FF4D8D" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Soft highlight in the top-left corner. -->
+    <path android:pathData="M0,0h108v108h-108z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="radial"
+                android:centerX="26"
+                android:centerY="20"
+                android:gradientRadius="62">
+                <item android:color="#40FFFFFF" android:offset="0.0" />
+                <item android:color="#00FFFFFF" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Material "music note" glyph, scaled into the safe area. -->
+    <group
+        android:scaleX="3.2"
+        android:scaleY="3.2"
+        android:translateX="15.6"
+        android:translateY="15.6">
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M12,3v10.55c-0.59,-0.34 -1.27,-0.55 -2,-0.55 -2.21,0 -4,1.79 -4,4s1.79,4 4,4 4,-1.79 4,-4V7h4V3h-6z" />
+    </group>
+</vector>

@@ -34,7 +34,7 @@ include(":core")
 include(":core:common")
 include(":core:data")
 include(":core:network")
-include(":core:uikit")
+include(":core:ui")
 include(":core:worker")
 
 // core/network
@@ -90,9 +90,8 @@ include(":core:camera")
 include(":core:camera:api")
 include(":core:camera:impl")
 
-// core/uikit
-include(":core:uikit:screens")
-include(":core:uikit:components")
+// core/ui
+// (shared Compose components and theme live in :core:ui)
 
 // core/worker
 include(":core:worker:sync")

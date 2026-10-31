@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.impl"
+    namespace = "com.sona.feature.comments.impl"
     compileSdk {
         version = release(37)
     }

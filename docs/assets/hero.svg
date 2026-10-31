@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-label="Sona music app hero">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0D0818"/>
+      <stop offset="45%" stop-color="#1E1038"/>
+      <stop offset="100%" stop-color="#0D0818"/>
+    </linearGradient>
+    <linearGradient id="title" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#F5F3FF"/>
+      <stop offset="50%" stop-color="#C4B5FD"/>
+      <stop offset="100%" stop-color="#5EEAD4"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="55%" stop-color="#D946EF"/>
+      <stop offset="100%" stop-color="#2DD4BF"/>
+    </linearGradient>
+    <radialGradient id="glowV" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowT" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#2DD4BF" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#2DD4BF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="360" rx="28" fill="url(#bg)"/>
+  <circle cx="960" cy="80" r="260" fill="url(#glowV)"/>
+  <circle cx="1080" cy="300" r="220" fill="url(#glowT)"/>
+  <circle cx="90" cy="320" r="200" fill="url(#glowV)" opacity="0.5"/>
+
+  <g transform="translate(80,86)">
+    <text x="0" y="0" fill="url(#title)" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="96" font-weight="800" letter-spacing="-3">Sona</text>
+    <text x="4" y="48" fill="#C4B5FD" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="19" letter-spacing="5">OPEN MUSIC · BEAUTIFULLY PLAYED</text>
+    <text x="4" y="96" fill="#8B7BB8" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="15">Kotlin · Jetpack Compose · Dagger 2 · Media3 · Audius API</text>
+
+    <g transform="translate(4,132)" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="13">
+      <rect x="0" y="0" width="150" height="34" rx="17" fill="#8B5CF6" opacity="0.18" stroke="#8B5CF6" stroke-opacity="0.5"/>
+      <text x="75" y="22" fill="#DDD6FE" text-anchor="middle">v1.0.0</text>
+      <rect x="164" y="0" width="180" height="34" rx="17" fill="#2DD4BF" opacity="0.12" stroke="#2DD4BF" stroke-opacity="0.4"/>
+      <text x="254" y="22" fill="#99F6E4" text-anchor="middle">28 device readers</text>
+      <rect x="358" y="0" width="190" height="34" rx="17" fill="#D946EF" opacity="0.12" stroke="#D946EF" stroke-opacity="0.4"/>
+      <text x="453" y="22" fill="#F5D0FE" text-anchor="middle">4 domain APIs</text>
+    </g>
+  </g>
+
+  <g transform="translate(930,120)">
+    <circle cx="0" cy="0" r="118" fill="#8B5CF6" opacity="0.10" stroke="#8B5CF6" stroke-opacity="0.25"/>
+    <circle cx="0" cy="0" r="88" fill="#120B22" stroke="#A78BFA" stroke-opacity="0.25"/>
+    <g transform="translate(-45,-30)">
+      <rect x="0" y="36" width="26" height="28" rx="13" fill="url(#bar)">
+        <animate attributeName="height" values="28;70;28" dur="0.62s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1"/>
+        <animate attributeName="y" values="36;0;36" dur="0.62s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1"/>
+      </rect>
+      <rect x="34" y="18" width="26" height="46" rx="13" fill="url(#bar)">
+        <animate attributeName="height" values="46;88;46" dur="0.78s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1"/>
+        <animate attributeName="y" values="18;-18;18" dur="0.78s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1"/>
+      </rect>
+      <rect x="68" y="26" width="26" height="38" rx="13" fill="url(#bar)">
+        <animate attributeName="height" values="38;80;38" dur="0.92s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1"/>
+        <animate attributeName="y" values="26;-16;26" dur="0.92s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1"/>
+      </rect>
+    </g>
+    <text x="0" y="86" fill="#8B7BB8" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="11" text-anchor="middle" letter-spacing="2">STREAMING</text>
+  </g>
+</svg>

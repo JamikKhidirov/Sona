@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-label="Sona splash avatar animation">
+  <defs>
+    <linearGradient id="splashBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0D0818"/>
+      <stop offset="50%" stop-color="#1B0F33"/>
+      <stop offset="100%" stop-color="#0D0818"/>
+    </linearGradient>
+    <linearGradient id="splashMark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7C5CFF"/>
+      <stop offset="55%" stop-color="#C44DFF"/>
+      <stop offset="100%" stop-color="#FF4D8D"/>
+    </linearGradient>
+    <radialGradient id="splashGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.65"/>
+      <stop offset="70%" stop-color="#C44DFF" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#C44DFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="splashTitle" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#F5F3FF"/>
+      <stop offset="100%" stop-color="#C4B5FD"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="420" rx="28" fill="url(#splashBg)"/>
+
+  <!-- Ambient glow behind the avatar -->
+  <g transform="translate(600,168)">
+    <circle r="170" fill="url(#splashGlow)">
+      <animate attributeName="opacity" values="0.45;0.85;0.45" dur="3.2s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Entrance: 0.82 -> 1.0, then frozen -->
+    <g>
+      <animateTransform attributeName="transform" type="scale" from="0.82" to="1"
+        dur="0.6s" fill="freeze" calcMode="spline" keySplines="0.2 0.8 0.2 1"/>
+
+      <!-- Breathing: 1 -> 1.045 -> 1 -->
+      <g>
+        <animateTransform attributeName="transform" type="scale" values="1;1.045;1"
+          dur="3.2s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.4 1;0.4 0 0.4 1"/>
+
+        <rect x="-62" y="-62" width="124" height="124" rx="40" fill="url(#splashMark)"/>
+        <rect x="-62" y="-62" width="124" height="124" rx="40" fill="#FFFFFF" opacity="0.06"/>
+        <path transform="translate(-38.4,-38.4) scale(3.2)" fill="#FFFFFF"
+          d="M12,3v10.55c-0.59,-0.34 -1.27,-0.55 -2,-0.55 -2.21,0 -4,1.79 -4,4s1.79,4 4,4 4,-1.79 4,-4V7h4V3h-6z"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Wordmark fades in shortly after the avatar -->
+  <g opacity="0">
+    <animate attributeName="opacity" from="0" to="1" begin="0.25s" dur="0.55s" fill="freeze"/>
+    <text x="600" y="322" text-anchor="middle" fill="url(#splashTitle)"
+      font-family="Segoe UI, Inter, Arial, sans-serif" font-size="58" font-weight="800" letter-spacing="14">SONA</text>
+    <text x="600" y="358" text-anchor="middle" fill="#9C8FD0"
+      font-family="Segoe UI, Inter, Arial, sans-serif" font-size="16" letter-spacing="3">OPEN MUSIC · BEAUTIFULLY PLAYED</text>
+  </g>
+
+  <text x="600" y="402" text-anchor="middle" fill="#5E5185"
+    font-family="Segoe UI, Inter, Arial, sans-serif" font-size="12" letter-spacing="2">splash · avatar spring-in 600 ms + breathing loop 3.2 s</text>
+</svg>
