@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="240" viewBox="0 0 720 240" role="img" aria-label="Sona equalizer animation">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1B1035"/>
+      <stop offset="55%" stop-color="#2A1350"/>
+      <stop offset="100%" stop-color="#120B22"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="55%" stop-color="#D946EF"/>
+      <stop offset="100%" stop-color="#2DD4BF"/>
+    </linearGradient>
+    <filter id="glow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="9" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="720" height="240" rx="26" fill="url(#bg)"/>
+  <circle cx="618" cy="54" r="110" fill="#8B5CF6" opacity="0.10"/>
+  <circle cx="86" cy="206" r="120" fill="#2DD4BF" opacity="0.07"/>
+
+  <text x="36" y="52" fill="#F5F3FF" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="1">Sona</text>
+  <text x="36" y="76" fill="#A78BFA" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="12" letter-spacing="3">PLAYING INDICATOR</text>
+
+  <g transform="translate(315,60)" filter="url(#glow)">
+    <rect x="0" y="116" width="22" height="24" rx="11" fill="url(#bar)">
+      <animate attributeName="height" values="24;80;24" dur="0.42s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1"/>
+      <animate attributeName="y" values="116;60;116" dur="0.42s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1"/>
+    </rect>
+    <rect x="34" y="96" width="22" height="44" rx="11" fill="url(#bar)">
+      <animate attributeName="height" values="44;100;44" dur="0.53s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1"/>
+      <animate attributeName="y" values="96;40;96" dur="0.53s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1"/>
+    </rect>
+    <rect x="68" y="106" width="22" height="34" rx="11" fill="url(#bar)">
+      <animate attributeName="height" values="34;90;34" dur="0.64s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1"/>
+      <animate attributeName="y" values="106;50;106" dur="0.64s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1"/>
+    </rect>
+  </g>
+
+  <g transform="translate(315,192)" fill="#A78BFA" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="11" text-anchor="middle">
+    <text x="45" y="0">0.25 → 1.0 · tween(420 / 530 / 640 ms) · Reverse</text>
+  </g>
+
+  <g transform="translate(36,174)" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="11" fill="#8B7BB8">
+    <text y="0">3 bars</text>
+    <text y="18">infiniteRepeatable</text>
+    <text y="36">height 4 → 15 dp</text>
+  </g>
+</svg>

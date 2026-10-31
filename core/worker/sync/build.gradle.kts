@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.sync"
+    namespace = "com.sona.core.worker.sync"
     compileSdk {
         version = release(37)
     }

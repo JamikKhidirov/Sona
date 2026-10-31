@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.auth"
+    namespace = "com.sona.core.network.firebase.auth"
     compileSdk {
         version = release(37)
     }

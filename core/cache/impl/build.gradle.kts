@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.impl"
+    namespace = "com.sona.core.cache.impl"
     compileSdk {
         version = release(37)
     }
