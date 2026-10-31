@@ -161,12 +161,12 @@ fun QueueSheet(
             .navigationBarsPadding(),
     ) {
         Text(
-            text = "Up next",
+            text = "Следующий шаг",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface,
         )
         Text(
-            text = "${queue.size} tracks in queue",
+            text = "${queue.size} треки в очереди",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
