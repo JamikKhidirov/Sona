@@ -5,9 +5,9 @@ import com.sona.core.common.model.Playlist
 import com.sona.core.common.model.Track
 
 enum class SearchTab(val label: String) {
-    TRACKS("Tracks"),
-    ARTISTS("Artists"),
-    PLAYLISTS("Playlists"),
+    TRACKS("Треки"),
+    ARTISTS("Артисты"),
+    PLAYLISTS("Плейлисты"),
 }
 
 data class SearchUiState(

@@ -43,10 +43,10 @@ private data class BottomBarItem(
 )
 
 private val items = listOf(
-    BottomBarItem(HomeDestination.ROUTE, "Home", Icons.Rounded.Home),
-    BottomBarItem(SearchDestination.ROUTE, "Search", Icons.Rounded.Search),
-    BottomBarItem(FavoritesDestination.ROUTE, "Liked", Icons.Rounded.Favorite),
-    BottomBarItem(ProfileDestination.ROUTE, "Profile", Icons.Rounded.Person),
+    BottomBarItem(HomeDestination.ROUTE, "Дом", Icons.Rounded.Home),
+    BottomBarItem(SearchDestination.ROUTE, "Поиск", Icons.Rounded.Search),
+    BottomBarItem(FavoritesDestination.ROUTE, "Лайки", Icons.Rounded.Favorite),
+    BottomBarItem(ProfileDestination.ROUTE, "Профиль", Icons.Rounded.Person),
 )
 
 @Composable
@@ -61,7 +61,7 @@ fun SonaBottomBar(
             .navigationBarsPadding()
             .padding(horizontal = 14.dp, vertical = 8.dp),
         shape = RoundedCornerShape(26.dp),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.99f),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
         shadowElevation = 14.dp,
     ) {

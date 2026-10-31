@@ -75,7 +75,7 @@ private fun ProfileScreen(
         item("header") {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Profile",
+                    text = "Профиль",
                     style = MaterialTheme.typography.displayMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.weight(1f),
@@ -111,7 +111,7 @@ private fun ProfileScreen(
 
         if (state.recentlyPlayed.isNotEmpty()) {
             item("recent-header") {
-                SectionHeader(title = "Recently played")
+                SectionHeader(title = "Недавно сыгранный")
             }
             item("recent-list") {
                 ProfileTracksRow(
@@ -127,7 +127,7 @@ private fun ProfileScreen(
         if (state.favorites.isNotEmpty()) {
             item("favorites-header") {
                 SectionHeader(
-                    title = "Liked tracks",
+                    title = "Понравившиеся треки",
                     action = "Open",
                     onAction = onOpenFavorites,
                 )
@@ -147,20 +147,20 @@ private fun ProfileScreen(
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 ProfileMenuItem(
                     icon = Icons.Rounded.Favorite,
-                    title = "Your library",
-                    subtitle = "${state.favorites.size} liked tracks",
+                    title = "Ваша библиотека",
+                    subtitle = "${state.favorites.size} понравившиеся треки",
                     onClick = onOpenFavorites,
                 )
                 ProfileMenuItem(
                     icon = Icons.Rounded.Settings,
-                    title = "Settings",
-                    subtitle = "Theme, Audius account, storage",
+                    title = "Настройки",
+                    subtitle = "Тема, учетная запись Audius, хранилище",
                     onClick = onOpenSettings,
                 )
                 ProfileMenuItem(
                     icon = Icons.Rounded.Info,
-                    title = "About Sona",
-                    subtitle = "Open music, beautifully played",
+                    title = "О приложении",
+                    subtitle = "Открытая музыка, прекрасно сыгранная",
                     onClick = { showAbout = true },
                 )
             }
@@ -171,13 +171,12 @@ private fun ProfileScreen(
         AlertDialog(
             onDismissRequest = { showAbout = false },
             confirmButton = {
-                TextButton(onClick = { showAbout = false }) { Text("Close") }
+                TextButton(onClick = { showAbout = false }) { Text("Понятно") }
             },
-            title = { Text("Sona") },
+            title = { Text("SONA") },
             text = {
                 Text(
-                    "A Compose-first music player powered by the Audius open network. " +
-                        "Streaming is provided by Audius and its artists.",
+                    "Музыкальный проигрыватель, работающий на базе открытой сети Audius. Потоковая передача осуществляется компанией Audius и ее исполнителями.",
                 )
             },
         )

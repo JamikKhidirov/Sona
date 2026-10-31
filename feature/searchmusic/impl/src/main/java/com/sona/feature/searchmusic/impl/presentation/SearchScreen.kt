@@ -90,13 +90,13 @@ private fun SearchScreen(
     ) {
         Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 18.dp)) {
             Text(
-                text = "Search",
+                text = "Поиск",
                 style = MaterialTheme.typography.displayMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Millions of tracks from the open Audius network.",
+                text = "Миллионы треков из открытой сети сети.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -171,14 +171,14 @@ private fun SearchResults(
         }
 
         when {
-            state.isLoading && !state.hasResults -> LoadingState(label = "Searching Audius…")
+            state.isLoading && !state.hasResults -> LoadingState(label = "Поиск…")
             state.error != null && !state.hasResults -> ErrorState(
                 message = state.error,
                 onRetry = { onIntent(SearchIntent.Retry) },
             )
             !state.hasResults -> EmptyState(
-                title = "No matches yet",
-                message = "Try a different spelling, artist handle, or genre.",
+                title = "Совпадений пока нет",
+                message = "Попробуйте использовать другое написание, имя исполнителя или жанр.",
             )
             else -> SearchTabContent(
                 state = state,

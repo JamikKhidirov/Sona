@@ -122,7 +122,7 @@ fun SplashBrand(modifier: Modifier = Modifier) {
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            text = "Open music, beautifully played.",
+            text = "Открытая музыка, прекрасно сыгранная.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,

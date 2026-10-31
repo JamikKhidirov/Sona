@@ -97,7 +97,7 @@ class ProfileViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            error = throwable.message ?: "Couldn't load your Audius profile.",
+                            error = throwable.message ?: "Не удалось загрузить ваш профиль Audius.",
                         )
                     }
                 }

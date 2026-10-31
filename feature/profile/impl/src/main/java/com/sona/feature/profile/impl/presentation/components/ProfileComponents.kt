@@ -124,7 +124,7 @@ fun ProfileHero(
                             modifier = Modifier.size(14.dp),
                         )
                         Text(
-                            text = if (state.isSignedIn) "Connected to Audius" else "Guest listener",
+                            text = if (state.isSignedIn) "Подключен" else "Приглашенный слушатель",
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.White.copy(alpha = 0.8f),
                         )
@@ -183,20 +183,19 @@ fun ConnectAudiusCard(
     ) {
         Column(Modifier.padding(18.dp)) {
             Text(
-                text = "Make it yours",
+                text = "Сделай это своим",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Spacer(Modifier.height(5.dp))
             Text(
-                text = "Add an Audius API token in Settings to load your profile, " +
-                    "followers and account details. Browsing works without one.",
+                text = "Добавьте токен Audius API в настройках, чтобы загрузить свой профиль, подписчиков и данные учетной записи. Просмотр работает и без него.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(12.dp))
             Text(
-                text = "Open settings",
+                text = "Открыть настройки",
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier

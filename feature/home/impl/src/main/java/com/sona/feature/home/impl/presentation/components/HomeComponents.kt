@@ -102,7 +102,7 @@ fun HomeSearchPill(
                 modifier = Modifier.size(20.dp),
             )
             Text(
-                text = "Search tracks, artists, playlists",
+                text = "Поиск треков, исполнителей, плейлистов",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
@@ -159,7 +159,7 @@ fun FeaturedTrackCard(
                 .padding(22.dp),
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinePill(text = "FEATURED")
+                OutlinePill(text = "Рекомендуемые")
                 track.genre?.let {
                     Text(
                         text = it,
@@ -179,7 +179,7 @@ fun FeaturedTrackCard(
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "${track.artistName}  ·  ${formatCount(track.playCount)} plays",
+                text = "${track.artistName}  ·  ${formatCount(track.playCount)} пьесы",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White.copy(alpha = 0.78f),
                 maxLines = 1,
@@ -189,13 +189,13 @@ fun FeaturedTrackCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 GradientCircleButton(
                     icon = if (isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
-                    contentDescription = if (isPlaying) "Pause" else "Play",
+                    contentDescription = if (isPlaying) "Пауза" else "Старт",
                     onClick = onPlay,
                     size = 54.dp,
                 )
                 Spacer(Modifier.size(14.dp))
                 Text(
-                    text = if (isPlaying) "Now playing" else "Play now",
+                    text = if (isPlaying) "Сейчас играю" else "Играйте прямо сейчас",
                     style = MaterialTheme.typography.labelLarge,
                     color = Color.White,
                     fontWeight = FontWeight.SemiBold,

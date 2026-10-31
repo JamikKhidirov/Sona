@@ -99,7 +99,7 @@ private fun HomeScreen(
                 HomeHeader(onOpenSettings = onOpenSettings)
                 Spacer(Modifier.height(22.dp))
                 Text(
-                    text = "Find your\nnext obsession",
+                    text = "Найди свою следующую навязчивую идею",
                     style = MaterialTheme.typography.displayMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
@@ -112,7 +112,7 @@ private fun HomeScreen(
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 item("all") {
                     SonaChip(
-                        text = "All",
+                        text = "Все",
                         selected = state.selectedGenre == null,
                         onClick = { onIntent(HomeIntent.SelectGenre(null)) },
                     )
@@ -159,8 +159,8 @@ private fun HomeScreen(
         if (state.trending.isNotEmpty()) {
             item("trending-header") {
                 SectionHeader(
-                    title = if (state.selectedGenre == null) "Trending now" else "${state.selectedGenre} heat",
-                    action = "See all",
+                    title = if (state.selectedGenre == null) "Сейчас это в тренде" else "${state.selectedGenre} жара",
+                    action = "Увидеть все",
                     onAction = {
                         val genre = state.selectedGenre
                         if (genre == null) {
@@ -229,7 +229,7 @@ private fun HomeScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text = "Powered by the Audius open network",
+                    text = "Работает от открытой сети Audius",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 )

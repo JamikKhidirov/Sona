@@ -73,11 +73,11 @@ class FavoritesViewModel @Inject constructor(
             }
             is FavoritesIntent.ToggleFavorite -> viewModelScope.launch {
                 toggleFavorite(intent.track)
-                _effects.emit(FavoritesEffect.Message("Removed from favorites"))
+                _effects.emit(FavoritesEffect.Message("Удалено из избранного"))
             }
             FavoritesIntent.ClearFavorites -> viewModelScope.launch {
                 clearLibrary()
-                _effects.emit(FavoritesEffect.Message("Library cleared"))
+                _effects.emit(FavoritesEffect.Message("Библиотека очищена"))
             }
         }
     }

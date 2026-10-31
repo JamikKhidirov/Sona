@@ -97,15 +97,15 @@ private fun FavoritesScreen(
         } else if (state.tracks.isEmpty()) {
             item("empty") {
                 EmptyState(
-                    title = "Your heart is open",
-                    message = "Tap the heart on any track and it will show up here.",
+                    title = "Твое сердце открыто",
+                    message = "Нажмите на сердечко на любом треке, и оно появится здесь.",
                     icon = Icons.Rounded.FavoriteBorder,
                 )
             }
         } else {
             item("list-header") {
                 Text(
-                    text = "Liked tracks",
+                    text = "Понравившиеся треки",
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.padding(top = 22.dp, bottom = 8.dp),
