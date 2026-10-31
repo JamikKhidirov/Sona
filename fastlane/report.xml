@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="fastlane.lanes">
+    
+    
+    
+      
+      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.0146474">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="1: cd C:/Users/user/AndroidStudioProjects/MusicApp &amp;&amp; gradlew.bat :core:ui:testDebugUnitTest :core:network:api:music:testDebugUnitTest --console=plain" time="6.7387086">
+        
+      </testcase>
+    
+  </testsuite>
+</testsuites>

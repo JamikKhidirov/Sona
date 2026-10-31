@@ -86,4 +86,29 @@ class AudiusMappersTest {
         assertEquals(1, playlist.tracks.size)
         assertEquals("t1", playlist.tracks.first().id)
     }
+
+    @Test
+    fun share_url_expands_permalinks_and_keeps_absolute_links() {
+        val relative = TrackDto(id = "t1", title = "One", permalink = "/sona/one")
+            .toDomainOrNull()!!
+        assertEquals("https://audius.co/sona/one", relative.shareUrl)
+
+        val bare = TrackDto(id = "t2", title = "Two", permalink = "sona/two")
+            .toDomainOrNull()!!
+        assertEquals("https://audius.co/sona/two", bare.shareUrl)
+
+        val absolute = TrackDto(
+            id = "t3",
+            title = "Three",
+            permalink = "https://audius.co/sona/three",
+        ).toDomainOrNull()!!
+        assertEquals("https://audius.co/sona/three", absolute.shareUrl)
+    }
+
+    @Test
+    fun share_url_falls_back_to_stream_url_without_permalink() {
+        val track = TrackDto(id = "D7KyD", title = "Night Drive").toDomainOrNull()!!
+
+        assertEquals(track.streamUrl, track.shareUrl)
+    }
 }

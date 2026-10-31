@@ -250,7 +250,7 @@ Get-ChildItem app\build\outputs\apk -Recurse -Filter *.apk |
 |---|---|---|
 | `:core:network:api:music:compileDebugKotlin` | **BUILD SUCCESSFUL** | ~19 s |
 | `:app:assembleDebug` | **BUILD SUCCESSFUL** | ~39 s (инкрементально) |
-| `:core:ui:testDebugUnitTest :core:network:api:music:testDebugUnitTest` | **BUILD SUCCESSFUL**, 10 тестов, 0 падений | ~1 min 36 s |
+| `:core:ui:testDebugUnitTest :core:network:api:music:testDebugUnitTest` | **BUILD SUCCESSFUL**, 12 тестов, 0 падений | ~1 min 36 s |
 | `compileDebugUnitTestKotlin compileDebugAndroidTestKotlin` | **BUILD SUCCESSFUL** | ~52 s |
 | `:app:assembleRelease` | **BUILD SUCCESSFUL** | ~3 min |
 

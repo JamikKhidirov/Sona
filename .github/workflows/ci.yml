@@ -1,0 +1,198 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [master, develop]
+    tags: ["v*"]
+  pull_request:
+    branches: [master, develop]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+env:
+  GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.daemon=false"
+  ANDROID_COMPILE_SDK: "37"
+
+jobs:
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Accept SDK licenses and install platform
+        run: |
+          yes | sdkmanager --licenses >/dev/null 2>&1 || true
+          sdkmanager "platforms;android-${ANDROID_COMPILE_SDK}" >/dev/null 2>&1 \
+            || sdkmanager --channel=3 "platforms;android-${ANDROID_COMPILE_SDK}" >/dev/null 2>&1 || true
+          sdkmanager "build-tools;${ANDROID_COMPILE_SDK}.0.0" >/dev/null 2>&1 || true
+
+      - name: Run unit tests
+        run: ./gradlew :core:ui:testDebugUnitTest :core:network:api:music:testDebugUnitTest --console=plain
+
+      - name: Compile test sources
+        run: ./gradlew compileDebugUnitTestKotlin compileDebugAndroidTestKotlin --console=plain
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            core/ui/build/reports/tests
+            core/network/api/music/build/reports/tests
+          if-no-files-found: ignore
+
+  fastlane:
+    name: Fastlane build
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Accept SDK licenses and install platform
+        run: |
+          yes | sdkmanager --licenses >/dev/null 2>&1 || true
+          sdkmanager "platforms;android-${ANDROID_COMPILE_SDK}" >/dev/null 2>&1 \
+            || sdkmanager --channel=3 "platforms;android-${ANDROID_COMPILE_SDK}" >/dev/null 2>&1 || true
+          sdkmanager "build-tools;${ANDROID_COMPILE_SDK}.0.0" >/dev/null 2>&1 || true
+
+      - name: Build debug APK with Fastlane
+        run: bundle exec fastlane build_debug
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: sona-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+
+  release:
+    name: Release build
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Accept SDK licenses and install platform
+        run: |
+          yes | sdkmanager --licenses >/dev/null 2>&1 || true
+          sdkmanager "platforms;android-${ANDROID_COMPILE_SDK}" >/dev/null 2>&1 \
+            || sdkmanager --channel=3 "platforms;android-${ANDROID_COMPILE_SDK}" >/dev/null 2>&1 || true
+          sdkmanager "build-tools;${ANDROID_COMPILE_SDK}.0.0" >/dev/null 2>&1 || true
+
+      - name: Build release APK
+        run: ./gradlew :app:assembleRelease --console=plain
+
+      - name: Upload release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: sona-release-apk
+          path: app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+
+      - name: Attach APK to GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app/build/outputs/apk/release/*.apk
+          generate_release_notes: true
+
+  telegram:
+    name: Send APK to Telegram
+    needs: fastlane
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Download debug APK
+        uses: actions/download-artifact@v4
+        with:
+          name: sona-debug-apk
+          path: dist
+
+      - name: Send APK with Fastlane
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_CAPTION: "Sona ${{ github.ref_name }} · ${{ github.sha }}"
+        run: |
+          APK="$(ls dist/*.apk | head -n 1)"
+          echo "Sending $APK"
+          bundle exec fastlane telegram apk:"$APK"
+
+  api-smoke:
+    name: Audius API smoke (non-blocking)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check live Audius endpoints
+        run: bash scripts/check-audius-api.sh

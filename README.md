@@ -9,8 +9,8 @@
   <img alt="Dagger" src="https://img.shields.io/badge/Dagger-2.60.1-FF6B00">
   <img alt="Audius" src="https://img.shields.io/badge/API-Audius-CC0FE0">
   <img alt="Modules" src="https://img.shields.io/badge/modules-74-2496ED">
-  <img alt="Build" src="https://img.shields.io/badge/build-passing-2EA043">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-blue">
+  <img alt="Build" src="https://github.com/JamikKhidirov/Sona/actions/workflows/ci.yml/badge.svg">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.1.0-blue">
 </p>
 
 **Sona** — Android-плеер и стриминговый клиент открытой музыкальной сети **Audius**.
@@ -19,11 +19,12 @@
 
 > **Статус:** собирается в debug и release без устройства. 74 модуля,
 > 9 экранов, 4 доменных API, 28 модулей информации об устройстве,
-> 10 unit-тестов (0 падений).
+> 12 unit-тестов (0 падений), CI/CD с Fastlane и доставкой APK в Telegram.
 
 > Документация: [архитектура](docs/ARCHITECTURE.md) · [экраны](docs/SCREENS.md) ·
 > [анимации](docs/ANIMATIONS.md) · [API](docs/API.md) · [модули](docs/MODULES.md) ·
-> [DI](docs/DI.md) · [сборка](docs/BUILD.md) · [changelog](CHANGELOG.md)
+> [DI](docs/DI.md) · [CI/CD](docs/CI_CD.md) · [сборка](docs/BUILD.md) ·
+> [changelog](CHANGELOG.md)
 
 ---
 
@@ -42,6 +43,7 @@
 - [Технологии](#технологии)
 - [Сборка и запуск](#сборка-и-запуск)
 - [Тесты](#тесты)
+- [CI/CD](#cicd)
 - [Версии и теги](#версии-и-теги)
 - [Документация](#документация)
 - [Ограничения](#ограничения)
@@ -58,7 +60,8 @@
 | ❤️ Библиотека | лайки, «недавно играло», общее время, play-all |
 | 👤 Профиль | аккаунт Audius, подписчики, лайки, недавние, меню, «О приложении» |
 | 📃 Коллекции | trending / genre / artist / playlist в одном экране |
-| 🎵 Детали трека | обложка, артист, жанр/настроение, статистика, описание, похожие треки |
+| 🎵 Детали трека | обложка, артист, жанр/настроение, статистика, описание, похожие треки, «поделиться», «открыть на Audius», «в очередь» |
+| 📤 Шеринг | системный share sheet для трека (название, артист, ссылка) из плеера и экрана трека |
 | ⚙️ Настройки | тема (system/light/dark), Audius-токен, очистка библиотеки, информация об устройстве |
 | 📱 Информация об устройстве | 28 модулей: батарея, сеть, Wi-Fi, Bluetooth, датчики, память, приложения и т.д. |
 | 🖼️ Бренд | один аватар `ic_sona_mark` на splash, в шапке Home и в adaptive-иконке запуска |
@@ -204,7 +207,10 @@ Sona/
 │   ├── splashscreen/ home/ searchmusic/ favorites/ profile/
 │   ├── detailmusic/ musiclist/ player/ settings/
 │   └── comments/                 # заготовка
-├── docs/                         # ARCHITECTURE, SCREENS, ANIMATIONS, API, MODULES, DI, BUILD
+├── docs/                         # ARCHITECTURE, SCREENS, ANIMATIONS, API, MODULES, DI, CI_CD, BUILD
+├── .github/workflows/ci.yml      # CI/CD: test → fastlane → telegram → release
+├── fastlane/                     # Fastfile, Appfile
+├── scripts/                      # Telegram-доставка и API smoke
 ├── gradle/libs.versions.toml     # version catalog
 └── settings.gradle.kts
 ```
@@ -348,7 +354,7 @@ app/build/outputs/apk/release/app-release-unsigned.apk
 | Файл | Что проверяет | Тестов |
 |---|---|---|
 | `core/ui/src/test/.../format/FormattersTest.kt` | `formatDuration` (минуты/часы), `formatCount` (K/M/B) | 2 |
-| `core/network/api/music/src/test/.../mapper/AudiusMappersTest.kt` | маппинг `TrackDto` / `UserDto` / `PlaylistDto`, fallback'и, `streamUrl` | 6 |
+| `core/network/api/music/src/test/.../mapper/AudiusMappersTest.kt` | маппинг `TrackDto` / `UserDto` / `PlaylistDto`, fallback'и, `streamUrl`, `shareUrl` | 8 |
 
 ```bash
 # только эти тесты
@@ -365,14 +371,33 @@ app/build/outputs/apk/release/app-release-unsigned.apk
 
 ```text
 core:ui                          tests=3  failures=0
-core:network:api:music           tests=7  failures=0
+core:network:api:music           tests=9  failures=0
 ```
 
-(в каждом модуле остался шаблонный `ExampleUnitTest`, поэтому всего 10 тестов;
-8 из них — содержательные.)
+(в каждом модуле остался шаблонный `ExampleUnitTest`, поэтому всего 12 тестов;
+10 из них — содержательные.)
 
 Отчёт HTML: `core/ui/build/reports/tests/testDebugUnitTest/index.html` и
 `core/network/api/music/build/reports/tests/testDebugUnitTest/index.html`.
+
+---
+
+## CI/CD
+
+![CI/CD](https://github.com/JamikKhidirov/Sona/actions/workflows/ci.yml/badge.svg)
+
+GitHub Actions (`.github/workflows/ci.yml`) на каждый push/PR:
+
+1. **test** — unit-тесты и компиляция тестовых исходников.
+2. **fastlane** — `bundle exec fastlane build_debug`, APK уходит артефактом.
+3. **telegram** — Fastlane-лейн `telegram` отправляет APK боту
+   (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`).
+4. **release** — на теге `v*` собирает release APK и прикладывает его к GitHub Release.
+5. **api-smoke** — живая проверка Audius, `continue-on-error`.
+
+Fastlane: `test`, `test_sources`, `build_debug`, `build_release`, `telegram`, `ci`.
+
+Секреты и пошаговая настройка — [docs/CI_CD.md](docs/CI_CD.md).
 
 ---
 
@@ -381,11 +406,12 @@ core:network:api:music           tests=7  failures=0
 | Тег | Что означает |
 |---|---|
 | `v1.0.0` | Первый полный релиз: все экраны, навигация, Audius API по доменам, общий `core/ui`, device-info |
+| `v1.1.0` | CI/CD, Fastlane, Telegram-доставка APK, шеринг треков, «открыть на Audius», «в очередь» |
 
 ```bash
 git tag -n                 # список тегов
-git show v1.0.0            # аннотация релиза
-git checkout v1.0.0        # состояние релиза
+git show v1.1.0            # аннотация релиза
+git checkout v1.1.0        # состояние релиза
 ```
 
 История изменений — [CHANGELOG.md](CHANGELOG.md).
@@ -402,6 +428,7 @@ git checkout v1.0.0        # состояние релиза
 | [docs/API.md](docs/API.md) | Audius API по доменам, DTO, маппинг, стриминг |
 | [docs/MODULES.md](docs/MODULES.md) | дерево модулей, правила зависимостей, рецепты |
 | [docs/DI.md](docs/DI.md) | Dagger 2: компонент, модули, скоупы, ViewModel, ошибки KSP |
+| [docs/CI_CD.md](docs/CI_CD.md) | GitHub Actions, Fastlane, Telegram-бот, API smoke, секреты |
 | [docs/BUILD.md](docs/BUILD.md) | требования, команды, APK, подпись, troubleshooting |
 | [CHANGELOG.md](CHANGELOG.md) | история версий и проверок |
 
@@ -409,7 +436,10 @@ git checkout v1.0.0        # состояние релиза
 
 ## Ограничения
 
-- Audius API не проверялся вживую в CI (нет эмулятора/сети в окружении сборки).
+- Audius API проверяется live-скриптом в CI, но джоба `api-smoke` не блокирует
+  сборку: Cloudflare может отвечать `403` датацентровым IP.
 - Release-APK не подписан: добавьте `signingConfigs` для публикации в стор.
+- Telegram-доставка требует секретов `TELEGRAM_BOT_TOKEN` и `TELEGRAM_CHAT_ID`;
+  без них шаг пропускается.
 - Часть инфраструктурных модулей (`cache`, `camera`, `comments`, `worker`) — заготовки.
 - Токен Audius вводится вручную в настройках; OAuth-флоу пока нет.

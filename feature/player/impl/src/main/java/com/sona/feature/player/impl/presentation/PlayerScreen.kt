@@ -20,6 +20,7 @@ import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.QueueMusic
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -45,6 +47,7 @@ import com.sona.core.ui.component.Artwork
 import com.sona.core.ui.component.CircleIconButton
 import com.sona.core.ui.component.EmptyState
 import com.sona.core.ui.format.formatDuration
+import com.sona.core.ui.util.shareTrack
 import com.sona.feature.player.impl.presentation.components.PlayerControls
 import com.sona.feature.player.impl.presentation.components.QueueSheet
 
@@ -55,6 +58,7 @@ fun PlayerScreen(
     onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     var showQueue by remember { mutableStateOf(false) }
     var dragProgress by remember { mutableStateOf<Float?>(null) }
 
@@ -236,7 +240,22 @@ fun PlayerScreen(
                         else MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                Spacer(Modifier.size(20.dp))
+                IconButton(
+                    onClick = {
+                        context.shareTrack(
+                            title = track.title,
+                            artist = track.artistName,
+                            url = track.shareUrl,
+                        )
+                    },
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Share,
+                        contentDescription = "Share track",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.size(12.dp))
                 Text(
                     text = if (state.player.isBuffering) "Buffering…" else "Streaming from Audius",
                     style = MaterialTheme.typography.bodySmall,

@@ -351,6 +351,9 @@ private fun toMediaItem(track: Track): MediaItem = MediaItem.Builder()
 
 - `@Streaming` в Retrofit нужен только для прямого скачивания/стриминга через
   `ResponseBody`; ExoPlayer работает с URL напрямую.
+- `Track.shareUrl` — публичная ссылка для share sheet и «Открыть на Audius»:
+  абсолютный `permalink` остаётся как есть, относительный разворачивается в
+  `https://audius.co/...`, а без `permalink` используется `streamUrl`.
 - `PlaybackService` — foreground-service с `mediaPlayback`, поэтому музыка
   продолжает играть при свёрнутом приложении.
 - `isStreamable=false` треки не попадают в очередь.

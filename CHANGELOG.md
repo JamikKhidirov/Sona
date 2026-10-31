@@ -5,6 +5,68 @@
 
 ---
 
+## [1.1.0] — 2026-10-31
+
+CI/CD, Fastlane, Telegram-доставка APK и новые действия с треком.
+
+Тег: `v1.1.0` · `versionCode = 2` · `versionName = "1.1.0"` · `applicationId = com.sona.music`
+
+### Добавлено
+
+**CI/CD**
+
+- `.github/workflows/ci.yml` — пайплайн GitHub Actions: `test` → `fastlane`
+  → `telegram`; на теге `v*` дополнительно `release` с GitHub Release;
+  `api-smoke` с `continue-on-error`.
+- `Gemfile`, `fastlane/Appfile`, `fastlane/Fastfile`, `fastlane/README.md` —
+  лейны `test`, `test_sources`, `build_debug`, `build_release`, `telegram`, `ci`.
+- `scripts/send-apk-telegram.sh` / `.ps1` — отправка APK через Bot API
+  `sendDocument`; без секретов шаг мягко пропускается.
+- `scripts/check-audius-api.sh` / `.ps1` — live-проверка `tracks/trending`,
+  `playlists/trending`, `users/search`.
+- `docs/CI_CD.md` — джобы, секреты, получение bot token и chat id, Fastlane,
+  локальный прогон, troubleshooting, чек-лист первого запуска.
+
+**Трек**
+
+- `Track.shareUrl` — публичная ссылка: абсолютный `permalink`, относительный
+  `permalink` → `https://audius.co/...`, иначе `streamUrl`.
+- `core/ui/util/IntentExt.kt` — `shareText`, `openUrl`, `shareTrack`.
+- Плеер: кнопка «Поделиться» рядом с лайком.
+- Экран трека: «В очередь», «Поделиться», «Открыть на Audius».
+- `DetailMusicIntent.AddToQueue` + снекбар «Added to queue».
+
+### Изменено
+
+- `versionName` → `1.1.0`, `versionCode` → `2`.
+- README: бейдж CI, раздел CI/CD, новые возможности, счётчики тестов.
+
+### Тесты
+
+- `AudiusMappersTest` +2: разворачивание `permalink` в `shareUrl` и fallback
+  на `streamUrl`.
+- Итог: `core:ui` 3 теста, `core:network:api:music` 9 тестов, 0 падений.
+
+### Проверено
+
+| Команда | Результат |
+|---|---|
+| `:core:ui:testDebugUnitTest :core:network:api:music:testDebugUnitTest` | BUILD SUCCESSFUL, 12 тестов, 0 падений |
+| `:feature:player:impl:compileDebugKotlin` | BUILD SUCCESSFUL |
+| `:feature:detailmusic:impl:compileDebugKotlin` | BUILD SUCCESSFUL |
+| `:app:assembleDebug` | BUILD SUCCESSFUL |
+| `compileDebugUnitTestKotlin compileDebugAndroidTestKotlin` | BUILD SUCCESSFUL |
+| `:app:assembleRelease` | BUILD SUCCESSFUL |
+
+### Ограничения
+
+- Live Audius API из окружения сборки отвечает `403` (Cloudflare); smoke-джоба
+  поэтому не блокирует пайплайн.
+- Telegram-доставка не проверена локально: нет `TELEGRAM_BOT_TOKEN` и
+  `TELEGRAM_CHAT_ID`. Скрипт и лейн проверены на graceful skip.
+
+---
+
 ## [1.0.0] — 2026-10-31
 
 Первый полный релиз: приложение собирается, все экраны реализованы, сеть
@@ -207,4 +269,5 @@
 
 ---
 
+[1.1.0]: https://github.com/JamikKhidirov/Sona/releases/tag/v1.1.0
 [1.0.0]: https://github.com/JamikKhidirov/Sona/releases/tag/v1.0.0

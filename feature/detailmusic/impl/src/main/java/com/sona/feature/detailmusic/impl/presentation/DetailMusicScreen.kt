@@ -18,9 +18,12 @@ import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.Headphones
+import androidx.compose.material.icons.rounded.OpenInNew
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.QueueMusic
 import androidx.compose.material.icons.rounded.Repeat
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -31,6 +34,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -47,6 +51,8 @@ import com.sona.core.ui.component.StatPill
 import com.sona.core.ui.component.TrackRow
 import com.sona.core.ui.format.formatCount
 import com.sona.core.ui.format.formatDuration
+import com.sona.core.ui.util.openUrl
+import com.sona.core.ui.util.shareTrack
 import com.sona.feature.detailmusic.impl.presentation.components.TrackDetailHero
 
 @Composable
@@ -161,6 +167,8 @@ private fun DetailContent(
     onOpenTrack: (String) -> Unit,
     onOpenArtist: (id: String, name: String) -> Unit,
 ) {
+    val context = LocalContext.current
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 28.dp),
@@ -194,6 +202,41 @@ private fun DetailContent(
                     tint = if (state.isFavorite) MaterialTheme.colorScheme.secondary
                     else MaterialTheme.colorScheme.onSurface,
                     size = 52.dp,
+                )
+            }
+        }
+
+        item("secondary-actions") {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                CircleIconButton(
+                    icon = Icons.Rounded.QueueMusic,
+                    contentDescription = "Add to queue",
+                    onClick = { onIntent(DetailMusicIntent.AddToQueue(track)) },
+                    size = 46.dp,
+                )
+                Spacer(Modifier.size(12.dp))
+                CircleIconButton(
+                    icon = Icons.Rounded.Share,
+                    contentDescription = "Share track",
+                    onClick = {
+                        context.shareTrack(
+                            title = track.title,
+                            artist = track.artistName,
+                            url = track.shareUrl,
+                        )
+                    },
+                    size = 46.dp,
+                )
+                Spacer(Modifier.size(12.dp))
+                CircleIconButton(
+                    icon = Icons.Rounded.OpenInNew,
+                    contentDescription = "Open on Audius",
+                    onClick = { context.openUrl(track.shareUrl) },
+                    size = 46.dp,
                 )
             }
         }

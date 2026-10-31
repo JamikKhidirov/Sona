@@ -1,0 +1,6 @@
+# Sona — Fastlane configuration.
+# The Android application id; used by future Play Store lanes.
+package_name("com.sona.music")
+
+# No Play Store JSON key is committed. Store upload lanes read
+# SUPPLY_JSON_KEY / PLAY_STORE_JSON_KEY from the environment when enabled.

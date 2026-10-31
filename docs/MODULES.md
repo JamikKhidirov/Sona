@@ -151,6 +151,7 @@ DataStore-ключи:
 | `component` | `Artwork`, `TrackRow`, `TrackTile`, `ArtistRow`, `ArtistTile`, `PlaylistRow`, `PlayingIndicator`, `MiniPlayer`, `SonaBackground`, `SonaLogo`, `SonaChip`, `SectionHeader`, `EmptyState`, `ErrorState`, `LoadingState`, `GradientCircleButton`, `CircleIconButton`, `OutlinePill`, `StatPill` |
 | `theme` | `Color.kt`, `Type.kt`, `Shape.kt`, `Theme.kt` (`SonaTheme`) |
 | `format` | `formatDuration`, `formatCount`, `greetingForNow` |
+| `util` | `IntentExt`: `shareText`, `openUrl`, `shareTrack` |
 | `res/drawable` | `ic_sona_mark` — аватар приложения (splash, Home, launcher icon) |
 
 Правило: если компонент нужен **двум и более** фичам — он живёт здесь.

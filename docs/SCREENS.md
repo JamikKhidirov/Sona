@@ -454,6 +454,7 @@ ViewModel грузит `getTrack(trackId)` и `getRelatedTracks(trackId)`; св�
 | `Load(trackId)` | Загружает трек и похожие |
 | `Play(track)` | Играет трек / ставит паузу |
 | `ToggleFavorite(track)` | Лайк + snackbar |
+| `AddToQueue(track)` | Добавляет трек в очередь + snackbar «Added to queue» |
 | `Retry` | Повторная загрузка |
 
 ### Структура UI
@@ -463,6 +464,7 @@ ViewModel грузит `getTrack(trackId)` и `getRelatedTracks(trackId)`; св�
 | Top bar | назад, метка «TRACK», сердце |
 | Hero | большая обложка, название, артист, жанр/настроение |
 | Действия | большая play/pause-кнопка + лайк |
+| Вторичные действия | «В очередь», «Поделиться», «Открыть на Audius» |
 | Статистика | `StatPill`: plays, likes, reposts |
 | Длительность | время + количество комментариев |
 | About | описание трека (до 8 строк) |
@@ -617,7 +619,7 @@ data class PlayerUiState(
 | Метаданные | название (2 строки), артист, ошибка плеера |
 | Progress | `Slider` с drag-состоянием + время слева/справа |
 | Controls | shuffle, previous, play/pause, next, repeat |
-| Footer | лайк + «Streaming from Audius» / «Buffering…» |
+| Footer | лайк, «Поделиться», «Streaming from Audius» / «Buffering…» |
 | Queue | `ModalBottomSheet` со списком очереди |
 
 ### Пустое состояние

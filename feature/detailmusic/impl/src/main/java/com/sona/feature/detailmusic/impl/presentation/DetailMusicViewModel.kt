@@ -89,6 +89,12 @@ class DetailMusicViewModel @Inject constructor(
                 )
             }
             DetailMusicIntent.Retry -> lastTrackId?.let(::load)
+            is DetailMusicIntent.AddToQueue -> {
+                audioPlayer.addToQueue(intent.track)
+                viewModelScope.launch {
+                    _effects.emit(DetailMusicEffect.Message("Added to queue"))
+                }
+            }
         }
     }
 

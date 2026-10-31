@@ -1,0 +1,61 @@
+default_platform(:android)
+
+# Windows consoles can emit cp866/cp1251 bytes; force UTF-8 so fastlane's
+# sh helper does not raise "invalid byte sequence in UTF-8" while stripping
+# Gradle output. Linux/macOS CI is UTF-8 already.
+Encoding.default_external = Encoding::UTF_8
+Encoding.default_internal = Encoding::UTF_8
+
+# Fastlane runs from the project root, but keep paths explicit so the lanes
+# also work when invoked from another directory.
+ROOT = File.expand_path("..", __dir__)
+
+def gradle(*tasks)
+  wrapper = Gem.win_platform? ? "gradlew.bat" : "./gradlew"
+  sh("cd #{ROOT} && #{wrapper} #{tasks.join(' ')} --console=plain")
+end
+
+platform :android do
+  desc "Run the JVM unit tests (formatters + Audius mappers)"
+  lane :test do
+    gradle(":core:ui:testDebugUnitTest", ":core:network:api:music:testDebugUnitTest")
+  end
+
+  desc "Compile unit-test and instrumentation-test sources"
+  lane :test_sources do
+    gradle("compileDebugUnitTestKotlin", "compileDebugAndroidTestKotlin")
+  end
+
+  desc "Build the debug APK"
+  lane :build_debug do
+    gradle(":app:assembleDebug")
+    UI.success("Debug APK: app/build/outputs/apk/debug/app-debug.apk")
+  end
+
+  desc "Build the release APK (unsigned unless a keystore is configured)"
+  lane :build_release do
+    gradle(":app:assembleRelease")
+    UI.success("Release APK: app/build/outputs/apk/release/")
+  end
+
+  desc "Send an APK to Telegram (skips when the bot secrets are absent)"
+  lane :telegram do |options|
+    apk = options[:apk] || ENV["APK_PATH"] || File.join(ROOT, "app/build/outputs/apk/debug/app-debug.apk")
+    caption = options[:caption] || ENV["TELEGRAM_CAPTION"] || "Sona build"
+
+    if ENV["TELEGRAM_BOT_TOKEN"].to_s.empty? || ENV["TELEGRAM_CHAT_ID"].to_s.empty?
+      UI.important("TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID are not set - skipping Telegram delivery")
+      next
+    end
+
+    script = File.join(ROOT, "scripts/send-apk-telegram.sh")
+    sh("bash", script, apk, caption)
+  end
+
+  desc "Full CI pipeline: unit tests, test sources and debug APK"
+  lane :ci do
+    test
+    test_sources
+    build_debug
+  end
+end
