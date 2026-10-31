@@ -21,7 +21,7 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 [bundle exec] fastlane android test
 ```
 
-Run the JVM unit tests (formatters + Audius mappers)
+Run all JVM unit tests (models, use cases, repositories, ViewModels)
 
 ### android test_sources
 
@@ -70,3 +70,7 @@ This README.md is auto-generated and will be re-generated every time [_fastlane_
 More information about _fastlane_ can be found on [fastlane.tools](https://fastlane.tools).
 
 The documentation of _fastlane_ can be found on [docs.fastlane.tools](https://docs.fastlane.tools).
+
+> Каноническая копия этой шпаргалки — `docs/FASTLANE.md`.
+> `fastlane/README.md` пересоздаётся Fastlane при каждом запуске и добавлен
+> в `.gitignore`.

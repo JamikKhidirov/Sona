@@ -16,9 +16,9 @@ def gradle(*tasks)
 end
 
 platform :android do
-  desc "Run the JVM unit tests (formatters + Audius mappers)"
+  desc "Run all JVM unit tests (models, use cases, repositories, ViewModels)"
   lane :test do
-    gradle(":core:ui:testDebugUnitTest", ":core:network:api:music:testDebugUnitTest")
+    gradle("testDebugUnitTest")
   end
 
   desc "Compile unit-test and instrumentation-test sources"

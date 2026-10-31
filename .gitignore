@@ -20,3 +20,6 @@ local.properties
 *.aab
 hs_err_pid*.log
 replay_pid*.log
+
+# Fastlane regenerates this on every run; the curated copy is docs/FASTLANE.md
+/fastlane/README.md

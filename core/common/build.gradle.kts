@@ -29,4 +29,7 @@ dependencies {
     implementation(libs.javax.inject)
     implementation(libs.dagger)
     ksp(libs.dagger.compiler)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

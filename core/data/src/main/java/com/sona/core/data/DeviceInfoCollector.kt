@@ -65,6 +65,13 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
+ * Abstraction over [DeviceInfoCollector] so presentation code can be tested without Android.
+ */
+interface DeviceSnapshotProvider {
+    suspend fun snapshot(): DeviceSnapshot
+}
+
+/**
  * Single entry point for every on-device information source. Each reader checks its own
  * runtime permission and degrades gracefully instead of throwing when access is missing.
  */
@@ -72,7 +79,7 @@ import javax.inject.Singleton
 class DeviceInfoCollector @Inject constructor(
     @ApplicationContext context: Context,
     private val dispatchers: DispatcherProvider,
-) {
+) : DeviceSnapshotProvider {
 
     private val alarms = AndroidAlarmsReader(context)
     private val apps = AndroidAppsReader(context)
@@ -133,7 +140,7 @@ class DeviceInfoCollector @Inject constructor(
     suspend fun wifi(): WifiInfoSnapshot = wifi.read()
 
     /** Collects every source concurrently. Permission-gated sources return empty results. */
-    suspend fun snapshot(): DeviceSnapshot = coroutineScope {
+    override suspend fun snapshot(): DeviceSnapshot = coroutineScope {
         val alarmsDeferred = async { alarms.read() }
         val appsDeferred = async { apps.read() }
         val batteryDeferred = async { battery.read() }

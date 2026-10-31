@@ -62,7 +62,7 @@ jobs:
           sdkmanager "platform-tools" >/dev/null 2>&1 || true
 
       - name: Run unit tests
-        run: ./gradlew :core:ui:testDebugUnitTest :core:network:api:music:testDebugUnitTest --console=plain
+        run: ./gradlew testDebugUnitTest --console=plain
 
       - name: Compile test sources
         run: ./gradlew compileDebugUnitTestKotlin compileDebugAndroidTestKotlin --console=plain
@@ -73,8 +73,8 @@ jobs:
         with:
           name: test-reports
           path: |
-            core/ui/build/reports/tests
-            core/network/api/music/build/reports/tests
+            **/build/reports/tests
+            **/build/test-results/testDebugUnitTest
           if-no-files-found: ignore
 
   fastlane:

@@ -5,6 +5,84 @@
 
 ---
 
+## [Unreleased]
+
+Расширенное тестовое покрытие, тестовые швы в DI и реорганизация
+документации: в корне репозитория остаётся только `README.md`, остальные
+документы живут в `docs/`.
+
+### Добавлено
+
+**Тесты**
+
+- `core:common` — `ModelsTest` (14) и `UseCasesTest` (8): модели, `shareUrl`,
+  обложки, жанры, настройки, делегирование use cases, ошибки и `Flow`.
+- `core:audio:api` — `PlayerStateTest` (9): очередь, индексы, repeat,
+  прогресс, `copy()`.
+- `core:network:api:music` — `MusicRepositoryImplTest` (14) на фейковых
+  `TrackApi` / `UserApi` / `PlaylistApi`: тренды, поиск, частичные отказы,
+  плейлисты, `getCurrentUser`.
+- ViewModel-тесты (73) для home, detailmusic, searchmusic, favorites,
+  musiclist, profile, player, settings: загрузка, пусто, ошибка, retry,
+  действия, лайки, очередь, настройки и device-снапшот.
+- `MainDispatcherRule` на `StandardTestDispatcher` в каждом feature-модуле.
+- `kotlinx-coroutines-test` в version catalog и `testImplementation`
+  затронутых модулей.
+
+**Документация**
+
+- `docs/TESTING.md` — матрица 142 тестов, фейки, правила, шаблоны, CI,
+  troubleshooting.
+- `docs/README.md` — оглавление документации, быстрый старт, правила
+  репозитория, архитектура в одном экране.
+- `docs/FASTLANE.md` — шпаргалка по лейнам (перенесена из `fastlane/README.md`).
+
+**DI и тестируемость**
+
+- `DeviceSnapshotProvider` — интерфейс, который реализует
+  `DeviceInfoCollector`; `SettingsViewModel` зависит от контракта, а не от
+  Android-коллектора.
+- `DeviceDataModule` (`@Binds`, `@Singleton`) подключён к `AppComponent`.
+
+### Изменено
+
+- `greetingForNow()` делегирует чистой `greetingForHour(hour)` — бакеты
+  приветствия тестируются без системных часов.
+- `FormattersTest` расширен с 2 до 6 тестов: границы `formatDuration`,
+  округление `formatCount`, все часы `greetingForHour`.
+- `docs/CHANGELOG.md` и `docs/FASTLANE.md` перенесены в `docs/`; ссылки в
+  README и CI_CD обновлены.
+- README: полная матрица тестов вместо двух файлов, ссылки на `docs/README.md`
+  и `docs/TESTING.md`, актуальные счётчики.
+- CI и Fastlane запускают `testDebugUnitTest` для всех модулей (179 тестов),
+  а не только `core:ui` и `core:network:api:music`; отчёты собираются по
+  всему проекту.
+- `core/ui` — `FormattersTest`; `core:audio:api`, `core:common`,
+  `core:network:api:music` и feature-модули получили тестовые зависимости.
+
+### Тесты
+
+| Набор | Тестов |
+|---|---:|
+| Содержательные тесты в 12 модулях | 132 |
+| Шаблонные `ExampleUnitTest` в этих модулях | 10 |
+| **Итого в 12 модулях** | **142** |
+| Шаблонные тесты в остальных 37 модулях | 37 |
+| **Полный `testDebugUnitTest`** | **179** |
+
+Все тесты зелёные: **0 failures, 0 errors**.
+
+### Проверено
+
+| Команда | Результат |
+|---|---|
+| `testDebugUnitTest` | BUILD SUCCESSFUL, 179 тестов, 0 падений |
+| `:app:assembleDebug` | BUILD SUCCESSFUL |
+| `compileDebugUnitTestKotlin compileDebugAndroidTestKotlin` | BUILD SUCCESSFUL |
+| `:app:assembleRelease` | BUILD SUCCESSFUL |
+
+---
+
 ## [1.1.0] — 2026-10-31
 
 CI/CD, Fastlane, Telegram-доставка APK и новые действия с треком.
@@ -18,7 +96,7 @@ CI/CD, Fastlane, Telegram-доставка APK и новые действия с
 - `.github/workflows/ci.yml` — пайплайн GitHub Actions: `test` → `fastlane`
   → `telegram`; на теге `v*` дополнительно `release` с GitHub Release;
   `api-smoke` с `continue-on-error`.
-- `Gemfile`, `fastlane/Appfile`, `fastlane/Fastfile`, `fastlane/README.md` —
+- `Gemfile`, `fastlane/Appfile`, `fastlane/Fastfile`, `docs/FASTLANE.md` —
   лейны `test`, `test_sources`, `build_debug`, `build_release`, `telegram`, `ci`.
 - `scripts/send-apk-telegram.sh` / `.ps1` — отправка APK через Bot API
   `sendDocument`; без секретов шаг мягко пропускается.
@@ -186,7 +264,7 @@ CI/CD, Fastlane, Telegram-доставка APK и новые действия с
 - `docs/DI.md` — Dagger 2: компонент, модули по слоям, скоупы, ViewModel
   multibinding, инъекция в сервис, тестирование графа, ошибки KSP.
 - `docs/BUILD.md` — требования, команды, APK, подпись, troubleshooting.
-- `CHANGELOG.md` — этот файл.
+- `CHANGELOG.md` — этот файл (позже переехал в `docs/`).
 - Анимированные SVG: `docs/assets/hero.svg`, `nav-transition.svg`, `equalizer.svg`.
 
 ### Изменено

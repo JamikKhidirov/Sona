@@ -19,12 +19,14 @@
 
 > **Статус:** собирается в debug и release без устройства. 74 модуля,
 > 9 экранов, 4 доменных API, 28 модулей информации об устройстве,
-> 12 unit-тестов (0 падений), CI/CD с Fastlane и доставкой APK в Telegram.
+> 142 unit-теста (132 содержательных + 10 шаблонных, 0 падений), CI/CD с Fastlane
+> и доставкой APK в Telegram.
 
-> Документация: [архитектура](docs/ARCHITECTURE.md) · [экраны](docs/SCREENS.md) ·
-> [анимации](docs/ANIMATIONS.md) · [API](docs/API.md) · [модули](docs/MODULES.md) ·
-> [DI](docs/DI.md) · [CI/CD](docs/CI_CD.md) · [сборка](docs/BUILD.md) ·
-> [changelog](CHANGELOG.md)
+> Документация: [оглавление](docs/README.md) · [архитектура](docs/ARCHITECTURE.md) ·
+> [экраны](docs/SCREENS.md) · [анимации](docs/ANIMATIONS.md) · [API](docs/API.md) ·
+> [модули](docs/MODULES.md) · [DI](docs/DI.md) · [тесты](docs/TESTING.md) ·
+> [CI/CD](docs/CI_CD.md) · [сборка](docs/BUILD.md) ·
+> [changelog](docs/CHANGELOG.md)
 
 ---
 
@@ -186,7 +188,8 @@ flowchart LR
 2. **Presentation** — `*ViewModel` + `*UiState` + `*Intent` + `*Effect`, MVI-подход.
 3. **Domain** — модели (`core/common/model`), контракты (`MusicRepository`), use cases.
 4. **Data** — `MusicRepositoryImpl`, DataStore, device-info readers.
-5. **DI** — Dagger 2: `AppComponent` + модули по слоям.
+5. **DI** — Dagger 2: `AppComponent` + модули по слоям; `DeviceDataModule`
+   связывает `DeviceInfoCollector` с контрактом `DeviceSnapshotProvider`.
 
 ---
 
@@ -207,7 +210,9 @@ Sona/
 │   ├── splashscreen/ home/ searchmusic/ favorites/ profile/
 │   ├── detailmusic/ musiclist/ player/ settings/
 │   └── comments/                 # заготовка
-├── docs/                         # ARCHITECTURE, SCREENS, ANIMATIONS, API, MODULES, DI, CI_CD, BUILD
+├── docs/                         # вся документация: README-оглавление, ARCHITECTURE,
+│                                 # SCREENS, ANIMATIONS, API, MODULES, DI, TESTING,
+│                                 # CI_CD, FASTLANE, BUILD, CHANGELOG
 ├── .github/workflows/ci.yml      # CI/CD: test → fastlane → telegram → release
 ├── fastlane/                     # Fastfile, Appfile
 ├── scripts/                      # Telegram-доставка и API smoke
@@ -348,37 +353,54 @@ app/build/outputs/apk/release/app-release-unsigned.apk
 
 ## Тесты
 
-Короткие unit-тесты на самые хрупкие чистые функции и мапперы — без Android,
-эмулятора и сети.
+Тесты быстрые и полностью JVM-based: без эмулятора, сети и Android-контекста.
+Модели, use cases, репозитории, форматтеры, состояние плеера и все ViewModel
+проверяются на фейках через JUnit 4 + `kotlinx-coroutines-test`.
 
-| Файл | Что проверяет | Тестов |
-|---|---|---|
-| `core/ui/src/test/.../format/FormattersTest.kt` | `formatDuration` (минуты/часы), `formatCount` (K/M/B) | 2 |
-| `core/network/api/music/src/test/.../mapper/AudiusMappersTest.kt` | маппинг `TrackDto` / `UserDto` / `PlaylistDto`, fallback'и, `streamUrl`, `shareUrl` | 8 |
+| Модуль | Тестов | Что проверяет |
+|---|---:|---|
+| `core:common` | 22 | модели, `shareUrl`, обложки, жанры, use cases, настройки |
+| `core:audio:api` | 9 | `PlayerState`: очередь, индексы, repeat, прогресс |
+| `core:network:api:music` | 23 | маппинг DTO, тренды, поиск, частичные отказы, плейлисты |
+| `core:ui` | 7 | `formatDuration`, `formatCount`, `greetingForHour/Now` |
+| `feature:home:impl` | 10 | загрузка, жанры, featured, очередь, лайк, retry |
+| `feature:detailmusic:impl` | 10 | трек + похожие, лайк, «в очередь», повторная загрузка |
+| `feature:searchmusic:impl` | 12 | debounce, вкладки, жанры, ошибки, очередь результатов |
+| `feature:favorites:impl` | 8 | библиотека, суммарная длительность, play-all, очистка |
+| `feature:musiclist:impl` | 13 | trending/genre/artist/playlist, неизвестный источник, retry |
+| `feature:profile:impl` | 10 | signed-in/out, ошибки, библиотечные Flow, очередь |
+| `feature:player:impl` | 8 | производный `UiState`, transport, shuffle, repeat, лайк |
+| `feature:settings:impl` | 10 | тема, токен, очистка библиотеки, device provider |
+| **Итого** | **142** | 132 содержательных + 10 шаблонных `ExampleUnitTest` |
 
 ```bash
-# только эти тесты
-./gradlew :core:ui:testDebugUnitTest :core:network:api:music:testDebugUnitTest
+# только содержательные тесты (12 модулей)
+./gradlew \
+  :core:common:testDebugUnitTest \
+  :core:audio:api:testDebugUnitTest \
+  :core:network:api:music:testDebugUnitTest \
+  :core:ui:testDebugUnitTest \
+  :feature:home:impl:testDebugUnitTest \
+  :feature:detailmusic:impl:testDebugUnitTest \
+  :feature:searchmusic:impl:testDebugUnitTest \
+  :feature:favorites:impl:testDebugUnitTest \
+  :feature:musiclist:impl:testDebugUnitTest \
+  :feature:profile:impl:testDebugUnitTest \
+  :feature:player:impl:testDebugUnitTest \
+  :feature:settings:impl:testDebugUnitTest
 
-# все unit-тесты проекта
+# все unit-тесты проекта (142 + 37 шаблонных в инфраструктурных модулях)
 ./gradlew testDebugUnitTest
 
 # проверить, что тестовые исходники компилируются (без запуска)
 ./gradlew compileDebugUnitTestKotlin compileDebugAndroidTestKotlin
 ```
 
-Результат на момент релиза:
+Результат: **0 failures, 0 errors**. HTML-отчёт:
+`<module>/build/reports/tests/testDebugUnitTest/index.html`.
 
-```text
-core:ui                          tests=3  failures=0
-core:network:api:music           tests=9  failures=0
-```
-
-(в каждом модуле остался шаблонный `ExampleUnitTest`, поэтому всего 12 тестов;
-10 из них — содержательные.)
-
-Отчёт HTML: `core/ui/build/reports/tests/testDebugUnitTest/index.html` и
-`core/network/api/music/build/reports/tests/testDebugUnitTest/index.html`.
+Полная матрица, фейки, `MainDispatcherRule`, правила и рецепты —
+в [docs/TESTING.md](docs/TESTING.md).
 
 ---
 
@@ -414,7 +436,7 @@ git show v1.1.0            # аннотация релиза
 git checkout v1.1.0        # состояние релиза
 ```
 
-История изменений — [CHANGELOG.md](CHANGELOG.md).
+История изменений — [docs/CHANGELOG.md](docs/CHANGELOG.md).
 
 ---
 
@@ -422,15 +444,18 @@ git checkout v1.1.0        # состояние релиза
 
 | Документ | О чём |
 |---|---|
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | слои, потоки данных, DI, принятые решения |
+| [docs/README.md](docs/README.md) | оглавление документации, быстрый старт, правила репозитория |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | слои, потоки данных, DI, threading, обработка ошибок, тестовые швы |
 | [docs/SCREENS.md](docs/SCREENS.md) | все экраны: состояния, интенты, эффекты, компоненты |
 | [docs/ANIMATIONS.md](docs/ANIMATIONS.md) | переходы, тайминги, эквалайзер, как менять |
 | [docs/API.md](docs/API.md) | Audius API по доменам, DTO, маппинг, стриминг |
 | [docs/MODULES.md](docs/MODULES.md) | дерево модулей, правила зависимостей, рецепты |
 | [docs/DI.md](docs/DI.md) | Dagger 2: компонент, модули, скоупы, ViewModel, ошибки KSP |
+| [docs/TESTING.md](docs/TESTING.md) | матрица 142 тестов, фейки, диспетчеры, правила, CI |
 | [docs/CI_CD.md](docs/CI_CD.md) | GitHub Actions, Fastlane, Telegram-бот, API smoke, секреты |
+| [docs/FASTLANE.md](docs/FASTLANE.md) | шпаргалка по лейнам Fastlane |
 | [docs/BUILD.md](docs/BUILD.md) | требования, команды, APK, подпись, troubleshooting |
-| [CHANGELOG.md](CHANGELOG.md) | история версий и проверок |
+| [docs/CHANGELOG.md](docs/CHANGELOG.md) | история версий и проверок |
 
 ---
 

@@ -680,7 +680,7 @@ data class DeviceSummary(
 | `ClearToken` | Удаляет токен |
 | `ClearDialogChanged(visible)` | Открывает/закрывает диалог очистки |
 | `ClearLibrary` | Удаляет лайки и историю из DataStore |
-| `RefreshDevice` | Перечитывает `DeviceInfoCollector.snapshot()` |
+| `RefreshDevice` | Перечитывает `DeviceSnapshotProvider.snapshot()` |
 
 `LifecycleResumeEffect` вызывает `RefreshDevice` каждый раз при возврате на экран
 (например, после выдачи разрешений в системных настройках).

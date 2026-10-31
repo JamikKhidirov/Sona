@@ -189,6 +189,7 @@ flowchart LR
         ApiModule::class,
         MusicModule::class,
         CoreDataModule::class,
+        DeviceDataModule::class,
         AudioModule::class,
         PlayerModule::class,
         ViewModelBindingModule::class,
@@ -212,6 +213,7 @@ interface AppComponent {
 | `ApiModule` | `TrackApi`, `PlaylistApi`, `UserApi`, `SearchApi` |
 | `MusicModule` | `MusicRepositoryImpl` → `MusicRepository` |
 | `CoreDataModule` | `LibraryRepository`, `SettingsRepository`, `TokenProvider` |
+| `DeviceDataModule` | `DeviceInfoCollector` → `DeviceSnapshotProvider`, `@Singleton` |
 | `AudioModule` | `ExoAudioPlayer` → `AudioPlayer` |
 | `PlayerModule` | `ExoPlayer` (singleton, общий для UI и сервиса) |
 | `ViewModelBindingModule` | `@ViewModelKey` для всех ViewModel |
@@ -309,7 +311,8 @@ sequenceDiagram
 ```mermaid
 flowchart LR
     Settings[SettingsScreen] --> VM[SettingsViewModel]
-    VM --> Collector[DeviceInfoCollector]
+    VM --> Provider[DeviceSnapshotProvider]
+    Provider -.->|@Binds| Collector[DeviceInfoCollector]
     Collector --> Battery[BatteryReader]
     Collector --> Network[NetworkReader]
     Collector --> Wifi[WifiReader]
@@ -350,11 +353,160 @@ flowchart LR
 
 ## 8. Тесты
 
-- Unit-тесты: `src/test` (JUnit 4).
-- Instrumented: `src/androidTest` (AndroidX Test + Espresso).
+Пирамида максимально плоская: подавляющая часть проверок — быстрые JVM-тесты,
+instrumented-слой зарезервирован под будущие UI-сценарии.
+
+| Уровень | Где | Что проверяет | Статус |
+|---|---|---|---|
+| Модели и форматтеры | `core:common`, `core:ui` | вычисляемые поля, границы, локализованные строки | ✅ 28 |
+| Use cases | `core:common` | делегирование, defaults, ошибки, `Flow` | ✅ 8 |
+| Маппинг и репозитории | `core:network:api:music` | DTO → модель, частичные отказы, `Result` | ✅ 22 |
+| Состояние плеера | `core:audio:api` | очередь, repeat, прогресс | ✅ 9 |
+| ViewModel | `feature/*/impl` | `UiState`, интенты, эффекты, retry, действия | ✅ 73 |
+| Compose UI | `feature/*/impl` | рендеринг, семантика, скриншоты | ⏳ instrumented |
+| Media3 / сервис | `core:audio:impl` | реальное воспроизведение, foreground | ⏳ на устройстве |
+
+- Unit-тесты: `src/test` (JUnit 4 + `kotlinx-coroutines-test`).
+- Instrumented: `src/androidTest` (AndroidX Test + Espresso); исходники
+  компилируются в CI, запуск требует эмулятора.
 - Все модули имеют настроенный `testInstrumentationRunner`.
 - Проверка сборки тестовых исходников:
 
 ```bash
 ./gradlew compileDebugUnitTestKotlin compileDebugAndroidTestKotlin
 ```
+
+Полная матрица, фейки и правила — [TESTING.md](TESTING.md).
+
+---
+
+## 9. Тестируемость и швы
+
+Архитектура построена так, чтобы ViewModel можно было создать в обычном
+JUnit-тесте без Android, Dagger и сети.
+
+### 9.1 Конструкторная инъекция
+
+Все зависимости приходят через конструктор. Нет `lateinit`-полей, сервис-
+локаторов и статических синглтонов, поэтому в тесте достаточно передать
+фейки:
+
+```kotlin
+class HomeViewModel @Inject constructor(
+    private val musicRepository: MusicRepository,
+    private val libraryRepository: LibraryRepository,
+    private val audioPlayer: AudioPlayer,
+) : ViewModel()
+```
+
+```kotlin
+val viewModel = HomeViewModel(
+    musicRepository = FakeMusicRepository(),
+    libraryRepository = FakeLibraryRepository(),
+    audioPlayer = FakeAudioPlayer(),
+)
+```
+
+### 9.2 Шов `DeviceSnapshotProvider`
+
+`SettingsViewModel` не должен зависеть от `DeviceInfoCollector`: коллектор
+тянет `Context`, 28 reader-модулей и разрешения. Поэтому введён узкий
+контракт:
+
+```kotlin
+interface DeviceSnapshotProvider {
+    suspend fun snapshot(): Result<DeviceSnapshot>
+}
+
+class DeviceInfoCollector @Inject constructor(
+    // readers...
+) : DeviceSnapshotProvider {
+    override suspend fun snapshot(): Result<DeviceSnapshot> = /* ... */
+}
+```
+
+```kotlin
+@Module
+interface DeviceDataModule {
+    @Binds
+    @Singleton
+    fun bindDeviceSnapshotProvider(collector: DeviceInfoCollector): DeviceSnapshotProvider
+}
+```
+
+ViewModel зависит только от интерфейса:
+
+```kotlin
+class SettingsViewModel @Inject constructor(
+    private val settingsRepository: SettingsRepository,
+    private val libraryRepository: LibraryRepository,
+    private val deviceProvider: DeviceSnapshotProvider,
+) : ViewModel()
+```
+
+В тесте подставляется `FakeDeviceSnapshotProvider` с `Result.success`,
+`Result.failure` или счётчиком вызовов — так проверяются успех, ошибка и
+`RefreshDevice`. Продакшн-граф не меняется: `@Binds` подставляет коллектор.
+
+### 9.3 Чистые функции вместо системного времени
+
+`greetingForNow()` читает `Calendar`, а `greetingForHour(hour)` — чистая
+функция. Тест проверяет все часовые бакеты, не завися от времени запуска:
+
+```kotlin
+fun greetingForNow(): String =
+    greetingForHour(Calendar.getInstance().get(Calendar.HOUR_OF_DAY))
+
+fun greetingForHour(hour: Int): String = when (hour) {
+    in 5..11 -> "Good morning"
+    in 12..17 -> "Good afternoon"
+    in 18..22 -> "Good evening"
+    else -> "Late night sounds"
+}
+```
+
+Тот же приём применим к любой логике с `Clock`, `Random` или `Locale`:
+передавайте значение параметром, а системный вызов оставляйте в тонкой
+обёртке.
+
+### 9.4 Фейковые API вместо MockWebServer
+
+`MusicRepositoryImpl` принимает `TrackApi`, `UserApi`, `PlaylistApi`.
+Тест реализует интерфейсы лямбдами и управляет ответом на каждый метод:
+
+```kotlin
+private class FakeTrackApi : TrackApi {
+    var trending: List<TrackDto>? = emptyList()
+    var error: Throwable? = null
+
+    override suspend fun getTrending(...) =
+        error?.let { throw it } ?: ApiResponse(data = trending)
+}
+```
+
+Это быстрее MockWebServer, не требует JSON-фикстур и позволяет точечно
+проверить битый DTO, `null` и частичный отказ.
+
+### 9.5 Границы тестируемости
+
+| Слой | Тестируется | Через что |
+|---|---|---|
+| Модели, форматтеры | ✅ | чистые функции, без Android |
+| Use cases | ✅ | фейковые репозитории |
+| Репозитории | ✅ | фейковые Retrofit-интерфейсы |
+| ViewModel | ✅ | фейки + `MainDispatcherRule` |
+| DataStore | ⚠️ косвенно | фейковый `SettingsRepository` |
+| Device readers | ❌ | требуют `Context`/разрешений |
+| Compose, Media3 | ❌ | устройство/эмулятор |
+
+### 9.6 Правило для новой фичи
+
+1. Зависимости — только интерфейсы из `core:common` или собственные
+   контракты; ничего из `impl` другой фичи.
+2. Системные API (`Context`, `Calendar`, `Random`) прячьте за интерфейсом
+   или параметром.
+3. ViewModel не создаёт корутины на `Dispatchers.IO` напрямую — только через
+   `DispatcherProvider` или `viewModelScope`.
+4. Каждый интент, меняющий состояние, должен иметь тест на успех и на
+   отказ.
+5. Одноразовые сообщения — только `Effect`, не поле в `UiState`.

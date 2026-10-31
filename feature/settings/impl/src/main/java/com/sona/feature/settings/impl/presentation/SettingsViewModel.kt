@@ -6,7 +6,7 @@ import com.sona.core.common.domain.usecase.ClearLibrary
 import com.sona.core.common.domain.usecase.ObserveSettings
 import com.sona.core.common.domain.usecase.SetApiToken
 import com.sona.core.common.domain.usecase.SetThemeMode
-import com.sona.core.data.DeviceInfoCollector
+import com.sona.core.data.DeviceSnapshotProvider
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -24,7 +24,7 @@ class SettingsViewModel @Inject constructor(
     private val setThemeMode: SetThemeMode,
     private val setApiToken: SetApiToken,
     private val clearLibrary: ClearLibrary,
-    private val deviceInfoCollector: DeviceInfoCollector,
+    private val deviceInfoCollector: DeviceSnapshotProvider,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SettingsUiState())

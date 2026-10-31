@@ -43,7 +43,7 @@ flowchart LR
 | `Gemfile` | `fastlane ~> 2.228` для `bundle install` |
 | `fastlane/Appfile` | `package_name("com.sona.music")` |
 | `fastlane/Fastfile` | лейны `test`, `test_sources`, `build_debug`, `build_release`, `telegram`, `ci` |
-| `fastlane/README.md` | короткая шпаргалка по лейнам |
+| `docs/FASTLANE.md` | короткая шпаргалка по лейнам |
 | `scripts/send-apk-telegram.sh` | `sendDocument` через `curl` (Linux/macOS/CI) |
 | `scripts/send-apk-telegram.ps1` | то же для Windows PowerShell |
 | `scripts/check-audius-api.sh` | live-проверка трёх эндпоинтов Audius |
@@ -70,13 +70,17 @@ flowchart LR
 ### 1. `test` — быстрые проверки
 
 ```bash
-./gradlew :core:ui:testDebugUnitTest :core:network:api:music:testDebugUnitTest
+./gradlew testDebugUnitTest
 ./gradlew compileDebugUnitTestKotlin compileDebugAndroidTestKotlin
 ```
 
 - JDK 25 (Temurin), Android SDK, Gradle 9.5.
-- Отчёты тестов (`build/reports/tests`) загружаются артефактом `test-reports`
-  даже при падении (`if: always()`).
+- Запускаются все unit-тесты проекта — 179 тестов в 49 модулях
+  (132 содержательных + 47 шаблонных `ExampleUnitTest`), см.
+  [TESTING.md](TESTING.md).
+- Отчёты тестов (`**/build/reports/tests`) и XML-результаты
+  (`**/build/test-results/testDebugUnitTest`) загружаются артефактом
+  `test-reports` даже при падении (`if: always()`).
 - Пока эта джоба красная, остальные не стартуют (`needs: test`).
 
 ### 2. `fastlane` — сборка debug APK

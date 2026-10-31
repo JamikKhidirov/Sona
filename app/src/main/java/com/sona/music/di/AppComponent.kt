@@ -7,6 +7,7 @@ import com.sona.core.audio.impl.service.PlaybackService
 import com.sona.core.common.di.ApplicationContext
 import com.sona.core.common.di.CoreDataModule
 import com.sona.core.common.presentation.SonaViewModelFactory
+import com.sona.core.data.di.DeviceDataModule
 import com.sona.core.network.audius.api.PlaylistApi
 import com.sona.core.network.audius.api.SearchApi
 import com.sona.core.network.audius.api.TrackApi
@@ -26,6 +27,7 @@ import javax.inject.Singleton
         ApiModule::class,
         MusicModule::class,
         CoreDataModule::class,
+        DeviceDataModule::class,
         AudioModule::class,
         PlayerModule::class,
         ViewModelBindingModule::class,

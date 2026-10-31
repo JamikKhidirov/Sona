@@ -20,4 +20,6 @@ android {
 
 dependencies {
     api(project(":core:common"))
+
+    testImplementation(libs.junit)
 }

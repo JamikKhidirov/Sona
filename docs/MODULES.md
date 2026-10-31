@@ -235,6 +235,10 @@ shuffle, repeat, error и вычисляемые `currentTrack`, `hasNext`, `has
 - собирать всё параллельно через `coroutineScope { async { ... } }`;
 - возвращать иммутабельный `DeviceSnapshot`.
 
+Снаружи коллектор доступен через контракт `DeviceSnapshotProvider`
+(`@Binds` в `DeviceDataModule`), чтобы `SettingsViewModel` не зависел от
+Android-контекста и мог тестироваться с фейком.
+
 Каждый reader:
 
 1. проверяет runtime-разрешение;

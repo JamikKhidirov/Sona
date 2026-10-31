@@ -29,12 +29,12 @@ private fun trim(value: Double): String {
     else String.format(Locale.US, "%.1f", rounded)
 }
 
-fun greetingForNow(): String {
-    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-    return when (hour) {
-        in 5..11 -> "Good morning"
-        in 12..17 -> "Good afternoon"
-        in 18..22 -> "Good evening"
-        else -> "Late night sounds"
-    }
+fun greetingForNow(): String = greetingForHour(Calendar.getInstance().get(Calendar.HOUR_OF_DAY))
+
+/** Pure variant of [greetingForNow] so the buckets can be unit-tested. */
+fun greetingForHour(hour: Int): String = when (hour) {
+    in 5..11 -> "Good morning"
+    in 12..17 -> "Good afternoon"
+    in 18..22 -> "Good evening"
+    else -> "Late night sounds"
 }

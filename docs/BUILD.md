@@ -250,9 +250,14 @@ Get-ChildItem app\build\outputs\apk -Recurse -Filter *.apk |
 |---|---|---|
 | `:core:network:api:music:compileDebugKotlin` | **BUILD SUCCESSFUL** | ~19 s |
 | `:app:assembleDebug` | **BUILD SUCCESSFUL** | ~39 s (инкрементально) |
-| `:core:ui:testDebugUnitTest :core:network:api:music:testDebugUnitTest` | **BUILD SUCCESSFUL**, 12 тестов, 0 падений | ~1 min 36 s |
+| `testDebugUnitTest` | **BUILD SUCCESSFUL**, 179 тестов, 0 падений | ~5 min |
 | `compileDebugUnitTestKotlin compileDebugAndroidTestKotlin` | **BUILD SUCCESSFUL** | ~52 s |
 | `:app:assembleRelease` | **BUILD SUCCESSFUL** | ~3 min |
+
+Совмещённый прогон `testDebugUnitTest :app:assembleDebug :app:assembleRelease
+compileDebugUnitTestKotlin compileDebugAndroidTestKotlin` — **BUILD SUCCESSFUL
+in 14m 24s**, 3157 задач. Итоговые APK: `app-debug.apk` (27,1 MB) и
+`app-release-unsigned.apk` (19,5 MB).
 
 Что это доказывает:
 

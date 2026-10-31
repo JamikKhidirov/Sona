@@ -56,6 +56,7 @@ flowchart TD
     Component --> ApiModule
     Component --> MusicModule
     Component --> CoreDataModule
+    Component --> DeviceDataModule
     Component --> AudioModule
     Component --> PlayerModule
     Component --> VMBinding["ViewModelBindingModule"]
@@ -71,6 +72,9 @@ flowchart TD
     CoreDataModule --> LibraryRepositoryImpl
     CoreDataModule --> SettingsRepositoryImpl
     CoreDataModule --> TokenProvider
+    DeviceDataModule --> DeviceInfoCollector
+    DeviceDataModule --> DeviceProvider["DeviceSnapshotProvider"]
+    DeviceInfoCollector -.->|@Binds| DeviceProvider
     AudioModule --> ExoAudioPlayer
     PlayerModule --> ExoPlayer
     VMBinding --> VMs["Map<Class, Provider<ViewModel>>"]
@@ -105,6 +109,7 @@ flowchart TD
         ApiModule::class,
         MusicModule::class,
         CoreDataModule::class,
+        DeviceDataModule::class,
         AudioModule::class,
         PlayerModule::class,
         ViewModelBindingModule::class,
@@ -263,6 +268,25 @@ class MusicRepositoryImpl @Inject constructor(
 
 `SettingsRepositoryImpl` одновременно реализует два контракта — Dagger
 разрешает это двумя `@Binds` на один `@Singleton` экземпляр.
+
+### `DeviceDataModule` — шов для device-info
+
+`core/data/.../di/DeviceDataModule.kt`
+
+```kotlin
+@Module
+interface DeviceDataModule {
+    @Binds
+    @Singleton
+    fun bindDeviceSnapshotProvider(collector: DeviceInfoCollector): DeviceSnapshotProvider
+}
+```
+
+`DeviceInfoCollector` — тяжёлая реализация с `Context` и 28 reader-модулями.
+`SettingsViewModel` зависит от узкого `DeviceSnapshotProvider`, поэтому в
+тесте подставляется фейк, а в приложении — коллектор. Подробнее —
+[ARCHITECTURE.md](ARCHITECTURE.md#92-шов-devicesnapshotprovider) и
+[TESTING.md](TESTING.md#тестовые-двойники).
 
 ### `AudioModule` + `PlayerModule`
 
@@ -638,6 +662,7 @@ import com.sona.core.network.audius.api.UserApi
 | `app/.../di/ViewModelBindingModule.kt` | `@IntoMap` биндинги всех ViewModel |
 | `app/.../SonaApplication.kt` | создаёт компонент, реализует `PlaybackServiceInjector` |
 | `core/common/.../di/CoreDataModule.kt` | репозитории DataStore, `TokenProvider` |
+| `core/data/.../di/DeviceDataModule.kt` | `DeviceInfoCollector` → `DeviceSnapshotProvider` |
 | `core/common/.../di/Qualifiers.kt` | `@ApplicationContext`, `@ApplicationScope` |
 | `core/common/.../di/ViewModelKey.kt` | `@MapKey` для ViewModel |
 | `core/common/.../presentation/SonaViewModelFactory.kt` | фабрика из карты |
