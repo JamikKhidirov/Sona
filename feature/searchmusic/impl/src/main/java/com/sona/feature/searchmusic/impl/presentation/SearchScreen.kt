@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -40,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
@@ -131,7 +133,6 @@ private fun SearchScreen(
         derivedStateOf { if (scrollProgress > 0.05f) 8.dp else 0.dp }
     }
 
-    // Исправленная логика скролла (корректно работает вверх и вниз)
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
@@ -158,23 +159,26 @@ private fun SearchScreen(
         }
     }
 
-    // Убрали .nestedScroll отсюда, так как корневой Column не скроллится
+    // ИСПРАВЛЕНО: Задаем единый фон всему экрану, чтобы не было прозрачных "дыр"
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background) // <-- ЕДИНЫЙ ФОН ЭКРАНА
             .statusBarsPadding()
     ) {
         // --- ШАПКА ---
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
                 .shadow(elevation = shadowElevation)
-                .background(Color.Transparent) // <-- ВЕРНУЛ ИСХОДНЫЙ ЦВЕТ
+                // ИСПРАВЛЕНО: Сплошной фон перекрывает треки. Тень падает на фон, а не на карточки!
+                // Если в твоем Scaffold фон задан как surface, замени background на surface здесь.
+                .background(MaterialTheme.colorScheme.background)
                 .padding(
                     start = horizontalPadding,
                     end = horizontalPadding,
                     top = topPadding,
-                    bottom = 6.dp
                 )
                 .clipToBounds()
         ) {
@@ -221,7 +225,6 @@ private fun SearchScreen(
         // --- СКРОЛЛЯЩИЙСЯ КОНТЕНТ ---
         Box(modifier = Modifier.weight(1f)) {
             if (!state.hasQuery) {
-                // Важно: добавь .nestedScroll(nestedScrollConnection) и внутрь BrowseGenres, если там есть скролл!
                 BrowseGenres(
                     modifier = Modifier
                         .fillMaxSize()
@@ -247,7 +250,7 @@ private fun SearchScreen(
 private fun SearchResults(
     state: SearchUiState,
     modifier: Modifier = Modifier,
-    nestedScrollConnection: NestedScrollConnection, // <-- ДОБАВЛЕНО
+    nestedScrollConnection: NestedScrollConnection,
     onIntent: (SearchIntent) -> Unit,
     onOpenTrack: (String) -> Unit,
     onOpenArtist: (id: String, name: String) -> Unit,
@@ -256,7 +259,8 @@ private fun SearchResults(
     Column(modifier = modifier) {
         TabRow(
             selectedTabIndex = state.selectedTab.ordinal,
-            containerColor = Color.Transparent,
+            // ИСПРАВЛЕНО: TabRow тоже должен иметь сплошной фон, чтобы не просвечивать
+            containerColor = MaterialTheme.colorScheme.background,
             contentColor = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(horizontal = 12.dp),
         ) {
@@ -298,14 +302,13 @@ private fun SearchResults(
 private fun SearchTabContent(
     state: SearchUiState,
     modifier: Modifier = Modifier,
-    nestedScrollConnection: NestedScrollConnection, // <-- ДОБАВЛЕНО
+    nestedScrollConnection: NestedScrollConnection,
     onIntent: (SearchIntent) -> Unit,
     onOpenTrack: (String) -> Unit,
     onOpenArtist: (id: String, name: String) -> Unit,
     onOpenPlaylist: (id: String, name: String) -> Unit,
 ) {
     LazyColumn(
-        // ИСПРАВЛЕНИЕ: .nestedScroll теперь здесь, где реальный скролл
         modifier = modifier.nestedScroll(nestedScrollConnection),
         contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
