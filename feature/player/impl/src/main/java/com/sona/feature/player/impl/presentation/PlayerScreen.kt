@@ -44,8 +44,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sona.core.ui.component.Artwork
-import com.sona.core.ui.component.CircleIconButton
-import com.sona.core.ui.component.EmptyState
+import com.sona.core.ui.component.common.CircleIconButton
+import com.sona.core.ui.component.common.EmptyState
 import com.sona.core.ui.format.formatDuration
 import com.sona.core.ui.util.shareTrack
 import com.sona.feature.player.impl.presentation.components.PlayerControls

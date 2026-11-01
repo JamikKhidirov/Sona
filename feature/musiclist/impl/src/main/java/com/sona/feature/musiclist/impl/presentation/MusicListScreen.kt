@@ -29,13 +29,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.sona.core.ui.component.CircleIconButton
-import com.sona.core.ui.component.EmptyState
-import com.sona.core.ui.component.ErrorState
-import com.sona.core.ui.component.LoadingState
-import com.sona.core.ui.component.TrackRow
+import com.sona.core.ui.component.common.CircleIconButton
+import com.sona.core.ui.component.common.EmptyState
+import com.sona.core.ui.component.common.ErrorState
+import com.sona.core.ui.component.common.LoadingState
+import com.sona.core.ui.component.track.TrackRow
 import com.sona.core.ui.format.formatDuration
 import com.sona.feature.musiclist.impl.presentation.components.CollectionHero
+import intent.MusicListIntent
+import model.MusicListEffect
 
 @Composable
 fun MusicListRoute(

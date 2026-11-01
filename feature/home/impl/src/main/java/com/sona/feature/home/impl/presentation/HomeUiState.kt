@@ -17,14 +17,5 @@ data class HomeUiState(
     val artists get() = tracks.map { it.artist }.distinctBy { it.id }.take(14)
 }
 
-sealed interface HomeIntent {
-    data class SelectGenre(val genre: String?) : HomeIntent
-    data class PlayTrack(val track: Track) : HomeIntent
-    data class ToggleFavorite(val track: Track) : HomeIntent
-    data object PlayFeatured : HomeIntent
-    data object Retry : HomeIntent
-}
 
-sealed interface HomeEffect {
-    data class Message(val text: String) : HomeEffect
-}
+

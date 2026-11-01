@@ -12,13 +12,5 @@ data class FavoritesUiState(
     val totalDurationSeconds: Int get() = tracks.sumOf { it.durationSeconds }
 }
 
-sealed interface FavoritesIntent {
-    data object PlayAll : FavoritesIntent
-    data class PlayTrack(val track: Track) : FavoritesIntent
-    data class ToggleFavorite(val track: Track) : FavoritesIntent
-    data object ClearFavorites : FavoritesIntent
-}
 
-sealed interface FavoritesEffect {
-    data class Message(val text: String) : FavoritesEffect
-}
+

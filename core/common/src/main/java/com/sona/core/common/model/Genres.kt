@@ -10,18 +10,18 @@ data class Genre(val name: String, val emoji: String)
 
 object Genres {
     val all: List<Genre> = listOf(
-        Genre("Electronic", "⚡"),
-        Genre("Hip-Hop/Rap", "🎤"),
-        Genre("R&B/Soul", "💜"),
-        Genre("Pop", "✨"),
-        Genre("Rock", "🎸"),
-        Genre("Lo-Fi", "🌙"),
-        Genre("House", "🏠"),
-        Genre("Techno", "🔊"),
-        Genre("Jazz", "🎷"),
-        Genre("Ambient", "🌫️"),
-        Genre("Dubstep", "🌀"),
-        Genre("Trap", "🔥"),
+        Genre("Зажигательный", "⚡"),
+        Genre("Хип-Хоп/Реп", "🎤"),
+        Genre("R&B/Душа", "💜"),
+        Genre("Поп", "✨"),
+        Genre("Рок", "🎸"),
+        Genre("Для сна", "🌙"),
+        Genre("Ваш вайб", "🏠"),
+        Genre("Техно", "🔊"),
+        Genre("Джаз", "🎷"),
+        Genre("Окружающий", "🌫️"),
+        Genre("Дабстеп", "🌀"),
+        Genre("Трэп", "🔥"),
     )
 
     fun byName(name: String?): Genre? = all.firstOrNull { it.name.equals(name, true) }

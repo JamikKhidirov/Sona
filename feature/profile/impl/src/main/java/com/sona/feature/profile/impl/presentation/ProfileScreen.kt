@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.sona.core.ui.component.SectionHeader
+import com.sona.core.ui.component.common.SectionHeader
 import com.sona.feature.profile.impl.presentation.components.ConnectAudiusCard
 import com.sona.feature.profile.impl.presentation.components.ProfileHero
 import com.sona.feature.profile.impl.presentation.components.ProfileMenuItem

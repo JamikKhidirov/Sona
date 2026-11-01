@@ -2,10 +2,10 @@ package com.sona.feature.settings.impl.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sona.core.common.domain.usecase.ClearLibrary
-import com.sona.core.common.domain.usecase.ObserveSettings
-import com.sona.core.common.domain.usecase.SetApiToken
-import com.sona.core.common.domain.usecase.SetThemeMode
+import com.sona.core.common.domain.usecase.library.ClearLibrary
+import com.sona.core.common.domain.usecase.settings.ObserveSettings
+import com.sona.core.common.domain.usecase.settings.SetApiToken
+import com.sona.core.common.domain.usecase.settings.SetThemeMode
 import com.sona.core.data.DeviceSnapshotProvider
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

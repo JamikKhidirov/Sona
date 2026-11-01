@@ -35,9 +35,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.sona.core.common.model.Track
 import com.sona.core.ui.component.Artwork
-import com.sona.core.ui.component.GradientCircleButton
-import com.sona.core.ui.component.OutlinePill
-import com.sona.core.ui.component.SonaLogo
+import com.sona.core.ui.component.common.GradientCircleButton
+import com.sona.core.ui.component.common.OutlinePill
+import com.sona.core.ui.component.common.SonaLogo
 import com.sona.core.ui.format.formatCount
 import com.sona.core.ui.format.greetingForNow
 
@@ -102,7 +102,7 @@ fun HomeSearchPill(
                 modifier = Modifier.size(20.dp),
             )
             Text(
-                text = "Поиск треков, исполнителей, плейлистов",
+                text = "Поиск...",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),

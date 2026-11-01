@@ -6,9 +6,9 @@ import com.sona.core.common.domain.model.AppSettings
 import com.sona.core.common.domain.repository.LibraryRepository
 import com.sona.core.common.domain.repository.MusicRepository
 import com.sona.core.common.domain.repository.SettingsRepository
-import com.sona.core.common.domain.usecase.GetCurrentUser
-import com.sona.core.common.domain.usecase.ObserveFavorites
-import com.sona.core.common.domain.usecase.ObserveRecentlyPlayed
+import com.sona.core.common.domain.usecase.music.GetCurrentUser
+import com.sona.core.common.domain.usecase.library.ObserveFavorites
+import com.sona.core.common.domain.usecase.library.ObserveRecentlyPlayed
 import com.sona.core.common.domain.usecase.ObserveSettings
 import com.sona.core.common.model.Artist
 import com.sona.core.common.model.Playlist

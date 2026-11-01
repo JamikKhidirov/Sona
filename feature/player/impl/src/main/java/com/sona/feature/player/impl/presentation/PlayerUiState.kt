@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sona.core.audio.AudioPlayer
 import com.sona.core.audio.PlayerState
-import com.sona.core.common.domain.usecase.ObserveFavoriteIds
-import com.sona.core.common.domain.usecase.ToggleFavorite
+import com.sona.core.common.domain.usecase.library.ObserveFavoriteIds
+import com.sona.core.common.domain.usecase.library.ToggleFavorite
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine

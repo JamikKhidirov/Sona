@@ -61,7 +61,7 @@ fun SearchField(
         onValueChange = onQueryChange,
         modifier = modifier.fillMaxWidth(),
         placeholder = {
-            Text("Artists, tracks, playlists…", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("Артисты, треки и плейлисты...", color = MaterialTheme.colorScheme.onSurfaceVariant)
         },
         leadingIcon = {
             Icon(
@@ -109,7 +109,7 @@ fun BrowseGenres(
     ) {
         item("browse-title") {
             Text(
-                text = "Browse all",
+                text = "Просмотреть все",
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(bottom = 2.dp),

@@ -2,24 +2,21 @@ package com.sona.feature.navigation.impl.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sona.core.common.domain.usecase.ObserveSettings
+import com.sona.core.common.domain.usecase.settings.ObserveSettings
 import com.sona.core.common.model.ThemeMode
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import model.AppUiState
 import javax.inject.Inject
 
-data class AppUiState(
-    val themeMode: ThemeMode = ThemeMode.SYSTEM,
-    val isLoading: Boolean = true,
-)
 
 /**
  * Owns app-wide presentation state such as the persisted theme preference.
  */
 class AppViewModel @Inject constructor(
-    observeSettings: ObserveSettings,
+    private val observeSettings: ObserveSettings,
 ) : ViewModel() {
 
     val state: StateFlow<AppUiState> = observeSettings()

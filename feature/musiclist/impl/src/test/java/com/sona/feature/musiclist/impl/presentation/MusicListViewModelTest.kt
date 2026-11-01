@@ -7,8 +7,8 @@ import com.sona.core.common.domain.repository.MusicRepository
 import com.sona.core.common.domain.usecase.GetArtistTracks
 import com.sona.core.common.domain.usecase.GetPlaylistTracks
 import com.sona.core.common.domain.usecase.GetTrendingTracks
-import com.sona.core.common.domain.usecase.ObserveFavoriteIds
-import com.sona.core.common.domain.usecase.ToggleFavorite
+import com.sona.core.common.domain.usecase.library.ObserveFavoriteIds
+import com.sona.core.common.domain.usecase.library.ToggleFavorite
 import com.sona.core.common.model.Artist
 import com.sona.core.common.model.Playlist
 import com.sona.core.common.model.SearchResult
@@ -25,7 +25,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 

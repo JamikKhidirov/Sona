@@ -3,10 +3,12 @@ package com.sona.feature.detailmusic.impl.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sona.core.audio.AudioPlayer
-import com.sona.core.common.domain.usecase.GetTrack
-import com.sona.core.common.domain.usecase.GetTrendingTracks
-import com.sona.core.common.domain.usecase.ObserveFavorites
-import com.sona.core.common.domain.usecase.ToggleFavorite
+import com.sona.core.common.domain.usecase.library.ObserveFavorites
+import com.sona.core.common.domain.usecase.library.ToggleFavorite
+import com.sona.core.common.domain.usecase.music.GetTrack
+import com.sona.core.common.domain.usecase.music.GetTrendingTracks
+import com.sona.core.common.model.Track
+import intent.DetailMusicIntent
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +20,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import model.DetailMusicEffect
 import javax.inject.Inject
 
 class DetailMusicViewModel @Inject constructor(
@@ -124,7 +127,7 @@ class DetailMusicViewModel @Inject constructor(
         }
     }
 
-    private suspend fun loadRelated(track: com.sona.core.common.model.Track) {
+    private suspend fun loadRelated(track: Track) {
         getTrendingTracks(genre = track.genre, limit = 12)
             .onSuccess { tracks ->
                 _state.update {

@@ -21,8 +21,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.sona.core.ui.component.Artwork
-import com.sona.core.ui.component.GradientCircleButton
-import com.sona.core.ui.format.formatDuration
+import com.sona.core.ui.component.common.GradientCircleButton
+
 
 /** Header card shared by every collection list (genre, artist, trending…). */
 @Composable

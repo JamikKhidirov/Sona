@@ -27,9 +27,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.sona.core.ui.component.EmptyState
+import com.sona.core.ui.component.common.EmptyState
+import com.sona.core.ui.component.track.TrackRow
 import com.sona.feature.favorites.impl.presentation.components.FavoritesHero
-import com.sona.core.ui.component.TrackRow
+import intent.FavoritesIntent
+import model.FavoritesEffect
+
 
 @Composable
 fun FavoritesRoute(
