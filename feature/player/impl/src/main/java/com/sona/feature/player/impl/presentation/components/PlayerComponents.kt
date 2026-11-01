@@ -37,7 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.sona.core.common.model.RepeatMode
 import com.sona.core.common.model.Track
-import com.sona.core.ui.component.TrackRow
+import com.sona.core.ui.component.track.TrackRow
 
 /** Shuffle / previous / play / next / repeat transport controls. */
 @Composable

@@ -36,7 +36,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.sona.core.common.model.Track
 import com.sona.core.ui.component.Artwork
-import com.sona.core.ui.component.TrackTile
+import com.sona.core.ui.component.track.TrackTile
 import com.sona.core.ui.format.formatCount
 import com.sona.feature.profile.impl.presentation.ProfileUiState
 

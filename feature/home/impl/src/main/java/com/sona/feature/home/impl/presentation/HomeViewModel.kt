@@ -3,10 +3,13 @@ package com.sona.feature.home.impl.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sona.core.audio.AudioPlayer
-import com.sona.core.common.domain.usecase.GetTrendingTracks
+
 import com.sona.core.common.domain.usecase.library.ObserveFavoriteIds
 import com.sona.core.common.domain.usecase.library.ToggleFavorite
+import com.sona.core.common.domain.usecase.music.GetTrendingTracks
 import com.sona.core.common.model.Track
+import model.HomeEffect
+import intent.HomeIntent
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,7 +70,7 @@ class HomeViewModel @Inject constructor(
                 toggleFavorite(intent.track)
                 _effects.emit(
                     HomeEffect.Message(
-                        if (wasFavorite) "Removed from favorites" else "Saved to favorites",
+                        if (wasFavorite) "Удалено из избранного" else "Сохранено в избранном",
                     ),
                 )
             }
@@ -97,7 +100,7 @@ class HomeViewModel @Inject constructor(
                             isLoading = false,
                             tracks = tracks,
                             error = if (tracks.isEmpty()) {
-                                "No tracks found for this vibe yet."
+                                "Пока не найдено ни одного трека, соответствующего этой атмосфере."
                             } else {
                                 null
                             },
@@ -108,7 +111,7 @@ class HomeViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            error = throwable.message ?: "Couldn't reach Audius. Check your connection.",
+                            error = throwable.message ?: "Не удалось дозвониться до Audius. Проверьте соединение.",
                         )
                     }
                 }

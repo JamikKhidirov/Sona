@@ -36,7 +36,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sona.core.ui.component.SonaLogo
+import com.sona.core.ui.component.common.SonaLogo
+
 
 /**
  * Splash brand block: the app avatar (the same mark the launcher icon uses)

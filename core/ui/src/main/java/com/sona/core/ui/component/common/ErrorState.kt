@@ -13,11 +13,11 @@ fun ErrorState(
     modifier: Modifier = Modifier,
 ) {
     EmptyState(
-        title = "Something went quiet",
+        title = "Что-то затихло",
         message = message,
         modifier = modifier,
         icon = Icons.Rounded.CloudOff,
-        actionText = "Try again",
+        actionText = "Обновить",
         onAction = onRetry,
     )
 }

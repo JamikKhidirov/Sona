@@ -6,7 +6,7 @@ import com.sona.core.audio.AudioPlayer
 import com.sona.core.common.domain.usecase.music.GetCurrentUser
 import com.sona.core.common.domain.usecase.library.ObserveFavorites
 import com.sona.core.common.domain.usecase.library.ObserveRecentlyPlayed
-import com.sona.core.common.domain.usecase.ObserveSettings
+import com.sona.core.common.domain.usecase.settings.ObserveSettings
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update

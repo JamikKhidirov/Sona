@@ -42,18 +42,20 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sona.core.common.model.Track
-import com.sona.core.ui.component.CircleIconButton
-import com.sona.core.ui.component.ErrorState
-import com.sona.core.ui.component.GradientCircleButton
-import com.sona.core.ui.component.LoadingState
-import com.sona.core.ui.component.SectionHeader
-import com.sona.core.ui.component.StatPill
-import com.sona.core.ui.component.TrackRow
+import com.sona.core.ui.component.common.CircleIconButton
+import com.sona.core.ui.component.common.ErrorState
+import com.sona.core.ui.component.common.GradientCircleButton
+import com.sona.core.ui.component.common.LoadingState
+import com.sona.core.ui.component.common.SectionHeader
+import com.sona.core.ui.component.common.StatPill
+import com.sona.core.ui.component.track.TrackRow
 import com.sona.core.ui.format.formatCount
 import com.sona.core.ui.format.formatDuration
 import com.sona.core.ui.util.openUrl
 import com.sona.core.ui.util.shareTrack
 import com.sona.feature.detailmusic.impl.presentation.components.TrackDetailHero
+import intent.DetailMusicIntent
+import model.DetailMusicEffect
 
 @Composable
 fun DetailMusicRoute(

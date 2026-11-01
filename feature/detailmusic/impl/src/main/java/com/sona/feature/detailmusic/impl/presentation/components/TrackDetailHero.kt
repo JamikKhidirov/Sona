@@ -30,7 +30,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.sona.core.common.model.Track
 import com.sona.core.ui.component.Artwork
-import com.sona.core.ui.component.OutlinePill
+import com.sona.core.ui.component.common.OutlinePill
+
 
 /** Artwork, title, artist and genre pills shown at the top of the track page. */
 @Composable
