@@ -23,10 +23,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@OptIn(FlowPreview::class)
 class SearchViewModel @Inject constructor(
     private val searchCatalog: SearchCatalog,
-    private val observeFavoriteIds: ObserveFavoriteIds,
+    observeFavoriteIds: ObserveFavoriteIds,
     private val toggleFavorite: ToggleFavorite,
     private val audioPlayer: AudioPlayer,
 ) : ViewModel() {
