@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -107,8 +108,63 @@ private fun HomeScreen(
     onOpenSearch: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
+    // Состояние "Все или ничего": если идет загрузка ИЛИ есть ошибка, и треков еще нет
+    val isInitialLoading = state.isLoading && state.tracks.isEmpty()
+    val isInitialError = state.error != null && state.tracks.isEmpty() && !state.isLoading
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+    ) {
+        // Если первая загрузка — показываем только индикатор по центру
+        if (isInitialLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                // Твой существующий LoadingState (если он уже красивый, оставь его)
+                // Если нет — можно использовать CircularProgressIndicator
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            }
+        }
+        // Если ошибка при первой загрузке — показываем только ошибку по центру
+        else if (isInitialError) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                ErrorState(
+                    message = state.error.orEmpty(),
+                    onRetry = { onIntent(HomeIntent.Retry) }
+                )
+            }
+        }
+        // Если данные есть (или пусто, но загрузка завершена) — показываем весь интерфейс
+        else {
+            HomeContent(
+                state = state,
+                onIntent = onIntent,
+                onOpenTrack = onOpenTrack,
+                onOpenList = onOpenList,
+                onOpenSearch = onOpenSearch,
+                onOpenSettings = onOpenSettings,
+            )
+        }
+    }
+}
+
+// Выносим основной контент в отдельную функцию, чтобы HomeScreen был чистым
+@Composable
+private fun HomeContent(
+    state: HomeUiState,
+    onIntent: (HomeIntent) -> Unit,
+    onOpenTrack: (String) -> Unit,
+    onOpenList: (source: String, id: String, title: String) -> Unit,
+    onOpenSearch: () -> Unit,
+    onOpenSettings: () -> Unit,
+) {
     val density = LocalDensity.current
-    // Дистанция, после которой шапка полностью скрывается
     val maxScrollPx = with(density) { 150.dp.toPx() }
 
     var scrollOffsetPx by remember { mutableFloatStateOf(0f) }
@@ -117,14 +173,12 @@ private fun HomeScreen(
         derivedStateOf { (scrollOffsetPx / maxScrollPx).coerceIn(0f, 1f) }
     }
 
-    // Плавное затухание и сжатие для хедера
     val headerAlpha = 1f - (scrollProgress * 1.5f).coerceIn(0f, 1f)
     val headerVisible = scrollProgress < 0.8f
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                // Тянем вверх (available.y < 0) или вниз (available.y > 0)
                 val newOffset = (scrollOffsetPx - available.y).coerceIn(0f, maxScrollPx)
                 val consumed = scrollOffsetPx - newOffset
                 scrollOffsetPx = newOffset
@@ -136,11 +190,9 @@ private fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .statusBarsPadding()
             .nestedScroll(nestedScrollConnection)
     ) {
         // --- ВЕРХНЯЯ ЧАСТЬ (Лого + Заголовок + Поиск) ---
-        // Оборачиваем в AnimatedVisibility, чтобы при скролле она плавно складывалась и уходила.
         AnimatedVisibility(
             visible = headerVisible,
             enter = expandVertically() + fadeIn(),
@@ -150,7 +202,7 @@ private fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 18.dp)
-                    .alpha(headerAlpha) // Дополнительное затухание
+                    .alpha(headerAlpha)
             ) {
                 HomeHeader(onOpenSettings = onOpenSettings)
                 Spacer(Modifier.height(22.dp))
@@ -165,7 +217,6 @@ private fun HomeScreen(
         }
 
         // --- ЛИПКИЕ ЖАНРЫ ---
-        // Они не скроллятся вместе с лентой, а всегда находятся сверху
         Surface(
             color = Color.Transparent,
             modifier = Modifier
@@ -200,11 +251,10 @@ private fun HomeScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .weight(1f), // Занимает оставшееся место
+                .weight(1f),
             contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 26.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
-            // Убрали "header" и "genres" из LazyColumn, так как они теперь наверху
             val featured = state.featured
             if (featured != null) {
                 item("featured") {
@@ -217,13 +267,8 @@ private fun HomeScreen(
                 }
             }
 
-            if (state.isLoading && state.tracks.isEmpty()) {
-                item("loading") { LoadingState() }
-            } else if (state.error != null && state.tracks.isEmpty()) {
-                item("error") {
-                    ErrorState(message = state.error.orEmpty(), onRetry = { onIntent(HomeIntent.Retry) })
-                }
-            } else if (state.tracks.isEmpty()) {
+            // Если треков нет, но загрузка уже прошла (пустой результат)
+            if (state.tracks.isEmpty() && !state.isLoading) {
                 item("empty") {
                     EmptyState(
                         title = "На циферблате ничего нет",
