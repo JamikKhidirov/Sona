@@ -1,6 +1,8 @@
 package com.sona.feature.home.impl.presentation
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -19,7 +21,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -108,63 +109,8 @@ private fun HomeScreen(
     onOpenSearch: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
-    // Состояние "Все или ничего": если идет загрузка ИЛИ есть ошибка, и треков еще нет
-    val isInitialLoading = state.isLoading && state.tracks.isEmpty()
-    val isInitialError = state.error != null && state.tracks.isEmpty() && !state.isLoading
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-    ) {
-        // Если первая загрузка — показываем только индикатор по центру
-        if (isInitialLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                // Твой существующий LoadingState (если он уже красивый, оставь его)
-                // Если нет — можно использовать CircularProgressIndicator
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-            }
-        }
-        // Если ошибка при первой загрузке — показываем только ошибку по центру
-        else if (isInitialError) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                ErrorState(
-                    message = state.error.orEmpty(),
-                    onRetry = { onIntent(HomeIntent.Retry) }
-                )
-            }
-        }
-        // Если данные есть (или пусто, но загрузка завершена) — показываем весь интерфейс
-        else {
-            HomeContent(
-                state = state,
-                onIntent = onIntent,
-                onOpenTrack = onOpenTrack,
-                onOpenList = onOpenList,
-                onOpenSearch = onOpenSearch,
-                onOpenSettings = onOpenSettings,
-            )
-        }
-    }
-}
-
-// Выносим основной контент в отдельную функцию, чтобы HomeScreen был чистым
-@Composable
-private fun HomeContent(
-    state: HomeUiState,
-    onIntent: (HomeIntent) -> Unit,
-    onOpenTrack: (String) -> Unit,
-    onOpenList: (source: String, id: String, title: String) -> Unit,
-    onOpenSearch: () -> Unit,
-    onOpenSettings: () -> Unit,
-) {
     val density = LocalDensity.current
+    // Дистанция, после которой шапка полностью скрывается
     val maxScrollPx = with(density) { 150.dp.toPx() }
 
     var scrollOffsetPx by remember { mutableFloatStateOf(0f) }
@@ -173,43 +119,70 @@ private fun HomeContent(
         derivedStateOf { (scrollOffsetPx / maxScrollPx).coerceIn(0f, 1f) }
     }
 
-    val headerAlpha = 1f - (scrollProgress * 1.5f).coerceIn(0f, 1f)
     val headerVisible = scrollProgress < 0.8f
 
+    // ИСПРАВЛЕНО: Корректная математика NestedScrollConnection для сворачивания/разворачивания
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                val newOffset = (scrollOffsetPx - available.y).coerceIn(0f, maxScrollPx)
-                val consumed = scrollOffsetPx - newOffset
+                val delta = available.y
+                val newOffset = (scrollOffsetPx - delta).coerceIn(0f, maxScrollPx)
+                val consumed = newOffset - scrollOffsetPx
                 scrollOffsetPx = newOffset
-                return Offset(0f, available.y + consumed)
+                // Возвращаем потребленную часть скролла
+                return Offset(0f, -consumed)
+            }
+
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                // Разворачиваем шапку при скролле вниз, если есть запас
+                if (available.y > 0f && scrollOffsetPx > 0f) {
+                    val newOffset = (scrollOffsetPx - available.y).coerceIn(0f, maxScrollPx)
+                    val consumedHere = scrollOffsetPx - newOffset
+                    scrollOffsetPx = newOffset
+                    return Offset(0f, consumedHere)
+                }
+                return Offset.Zero
             }
         }
     }
 
+    // УБРАЛИ .nestedScroll отсюда, так как корневой Column не скроллится
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .nestedScroll(nestedScrollConnection)
+            .statusBarsPadding()
     ) {
         // --- ВЕРХНЯЯ ЧАСТЬ (Лого + Заголовок + Поиск) ---
+        // ИСПРАВЛЕНО: Красивые и плавные переходы через AnimatedVisibility
         AnimatedVisibility(
             visible = headerVisible,
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut()
+            enter = fadeIn(animationSpec = tween(250, easing = FastOutSlowInEasing)) +
+                    expandVertically(
+                        expandFrom = Alignment.Top,
+                        animationSpec = tween(350, easing = FastOutSlowInEasing)
+                    ),
+            exit = fadeOut(animationSpec = tween(250, easing = FastOutSlowInEasing)) +
+                    shrinkVertically(
+                        shrinkTowards = Alignment.Top,
+                        animationSpec = tween(350, easing = FastOutSlowInEasing)
+                    )
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 18.dp)
-                    .alpha(headerAlpha)
+                // Убрали .alpha(headerAlpha), так как fadeIn/fadeOut делают это плавнее
             ) {
                 HomeHeader(onOpenSettings = onOpenSettings)
                 Spacer(Modifier.height(22.dp))
                 Text(
                     text = "Найди свою следующую навязчивую идею",
                     style = MaterialTheme.typography.displayMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = MaterialTheme.colorScheme.onBackground, // Правильный цвет для обеих тем
                 )
                 Spacer(Modifier.height(18.dp))
                 HomeSearchPill(onClick = onOpenSearch)
@@ -217,12 +190,13 @@ private fun HomeContent(
         }
 
         // --- ЛИПКИЕ ЖАНРЫ ---
+        // ИСПРАВЛЕНО: Цвета и тени для идеального отображения в темной и светлой теме
         Surface(
             color = Color.Transparent,
+            tonalElevation = if (scrollProgress > 0.05f) 3.dp else 0.dp, // Современный M3 эффект "приподнятости"
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(elevation = if (scrollProgress > 0.05f) 8.dp else 0.dp)
-                .background(Color.Transparent)
+            // Убрали .shadow и .background, Surface сам отлично справляется с фоном и тенью
         ) {
             LazyRow(
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
@@ -249,9 +223,11 @@ private fun HomeContent(
         val trendingTracks = remember(state.trending) { state.trending.take(8) }
 
         LazyColumn(
+            // ИСПРАВЛЕНО: .nestedScroll применен именно к скроллящемуся элементу
             modifier = Modifier
                 .fillMaxSize()
-                .weight(1f),
+                .weight(1f)
+                .nestedScroll(nestedScrollConnection),
             contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 26.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
@@ -267,8 +243,13 @@ private fun HomeContent(
                 }
             }
 
-            // Если треков нет, но загрузка уже прошла (пустой результат)
-            if (state.tracks.isEmpty() && !state.isLoading) {
+            if (state.isLoading && state.tracks.isEmpty()) {
+                item("loading") { LoadingState() }
+            } else if (state.error != null && state.tracks.isEmpty()) {
+                item("error") {
+                    ErrorState(message = state.error.orEmpty(), onRetry = { onIntent(HomeIntent.Retry) })
+                }
+            } else if (state.tracks.isEmpty()) {
                 item("empty") {
                     EmptyState(
                         title = "На циферблате ничего нет",
@@ -354,7 +335,8 @@ private fun HomeContent(
                     Text(
                         text = "Работает от открытой сети Audius",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.alpha(0.7f) // ИСПРАВЛЕНО: Более идиоматичный способ изменения прозрачности
                     )
                 }
             }

@@ -5,11 +5,15 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -68,8 +72,8 @@ fun SonaApp(
         val currentRoute = currentEntry?.destination?.route
         val showBottomBar = currentRoute in topLevelRoutes
         val showMiniPlayer = playerState.track != null &&
-            currentRoute != PlayerDestination.ROUTE &&
-            currentRoute != SplashDestination.ROUTE
+                currentRoute != PlayerDestination.ROUTE &&
+                currentRoute != SplashDestination.ROUTE
 
         fun navigateTopLevel(route: String) {
             if (route == currentRoute) return
@@ -81,23 +85,33 @@ fun SonaApp(
         }
 
         SonaBackground(modifier = modifier.fillMaxSize()) {
-            Column(modifier = Modifier.fillMaxSize()) {
+            // ✅ ИСПРАВЛЕНИЕ: Box вместо Column с weight(1f)
+            Box(modifier = Modifier.fillMaxSize()) {
                 NavHost(
                     navController = navController,
                     startDestination = SplashDestination.ROUTE,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        // Отступ снизу под панели (чтобы контент не перекрывался)
+                        .padding(
+                            bottom = (
+                                    if (showMiniPlayer) 72.dp else 0.dp
+                                    ) + (
+                                    if (showBottomBar) 80.dp else 0.dp
+                                    )
+                        ),
                     enterTransition = {
                         fadeIn(animationSpec = tween(260)) +
-                            slideInHorizontally(animationSpec = tween(260)) { it / 14 }
+                                slideInHorizontally(animationSpec = tween(260)) { it / 14 }
                     },
                     exitTransition = { fadeOut(animationSpec = tween(180)) },
                     popEnterTransition = {
                         fadeIn(animationSpec = tween(220)) +
-                            slideInHorizontally(animationSpec = tween(220)) { -it / 14 }
+                                slideInHorizontally(animationSpec = tween(220)) { -it / 14 }
                     },
                     popExitTransition = {
                         fadeOut(animationSpec = tween(180)) +
-                            slideOutHorizontally(animationSpec = tween(220)) { it / 14 }
+                                slideOutHorizontally(animationSpec = tween(220)) { it / 14 }
                     },
                 ) {
                     composable(SplashDestination.ROUTE) {
@@ -239,28 +253,33 @@ fun SonaApp(
                     }
                 }
 
-                if (showMiniPlayer) {
-                    MiniPlayer(
-                        track = playerState.track,
-                        isPlaying = playerState.player.isPlaying,
-                        progress = playerState.player.progress,
-                        onTogglePlayPause = {
-                            playerViewModel.onIntent(PlayerIntent.TogglePlayPause)
-                        },
-                        onNext = { playerViewModel.onIntent(PlayerIntent.Next) },
-                        onOpen = {
-                            navController.navigate(PlayerDestination.ROUTE) {
-                                launchSingleTop = true
-                            }
-                        },
-                    )
-                }
+                // ✅ Нижние панели выровнены по нижнему краю
+                Column(
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                ) {
+                    if (showMiniPlayer) {
+                        MiniPlayer(
+                            track = playerState.track,
+                            isPlaying = playerState.player.isPlaying,
+                            progress = playerState.player.progress,
+                            onTogglePlayPause = {
+                                playerViewModel.onIntent(PlayerIntent.TogglePlayPause)
+                            },
+                            onNext = { playerViewModel.onIntent(PlayerIntent.Next) },
+                            onOpen = {
+                                navController.navigate(PlayerDestination.ROUTE) {
+                                    launchSingleTop = true
+                                }
+                            },
+                        )
+                    }
 
-                if (showBottomBar) {
-                    SonaBottomBar(
-                        currentRoute = currentRoute,
-                        onNavigate = { route -> navigateTopLevel(route) },
-                    )
+                    if (showBottomBar) {
+                        SonaBottomBar(
+                            currentRoute = currentRoute,
+                            onNavigate = { route -> navigateTopLevel(route) },
+                        )
+                    }
                 }
             }
         }

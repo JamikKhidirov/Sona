@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -40,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
@@ -108,77 +110,78 @@ private fun SearchScreen(
     onOpenPlaylist: (id: String, name: String) -> Unit,
 ) {
     val density = LocalDensity.current
-    // Увеличиваем дистанцию скролла, чтобы текст "уходил" медленнее (было 100.dp)
     val maxScrollPx = with(density) { 100.dp.toPx() }
-
     var scrollOffsetPx by remember { mutableFloatStateOf(0f) }
 
-    // Используем eased прогресс, чтобы начало было медленнее, а конец плавным
     val rawProgress by remember {
         derivedStateOf { (scrollOffsetPx / maxScrollPx).coerceIn(0f, 1f) }
     }
-    // Простая нелинейная функция для более мягкого старта (можно заменить на CubicBezierEasing)
     val scrollProgress by remember {
-        derivedStateOf {
-            rawProgress * rawProgress
-        }
+        derivedStateOf { rawProgress * rawProgress }
     }
 
     val horizontalPadding by remember {
-        derivedStateOf {
-            20.dp * (1f - scrollProgress)
-        }
+        derivedStateOf { 20.dp * (1f - scrollProgress) }
     }
     val topPadding by remember {
-        derivedStateOf {
-            18.dp * (1f - scrollProgress)
-        }
+        derivedStateOf { 18.dp * (1f - scrollProgress) }
     }
-    // Заголовок начинает исчезать только после того, как скролл прошел 10%
     val titleVisible by remember {
-        derivedStateOf {
-            scrollProgress < 0.9f
-        }
+        derivedStateOf { scrollProgress < 0.9f }
     }
-
     val shadowElevation by remember {
-        derivedStateOf {
-            if (scrollProgress > 0.05f) 8.dp else 0.dp
-        }
+        derivedStateOf { if (scrollProgress > 0.05f) 8.dp else 0.dp }
     }
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                val newOffset = (scrollOffsetPx - available.y).coerceIn(0f, maxScrollPx)
-                val consumed = scrollOffsetPx - newOffset
+                val delta = available.y
+                val newOffset = (scrollOffsetPx - delta).coerceIn(0f, maxScrollPx)
+                val consumed = newOffset - scrollOffsetPx
                 scrollOffsetPx = newOffset
-                return Offset(0f, available.y + consumed)
+                return Offset(0f, -consumed)
+            }
+
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                if (scrollOffsetPx > 0f && available.y > 0f) {
+                    val newOffset = (scrollOffsetPx - available.y).coerceIn(0f, maxScrollPx)
+                    val consumedHere = scrollOffsetPx - newOffset
+                    scrollOffsetPx = newOffset
+                    return Offset(0f, consumedHere)
+                }
+                return Offset.Zero
             }
         }
     }
 
+    // ИСПРАВЛЕНО: Задаем единый фон всему экрану, чтобы не было прозрачных "дыр"
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background) // <-- ЕДИНЫЙ ФОН ЭКРАНА
             .statusBarsPadding()
-            .nestedScroll(nestedScrollConnection)
     ) {
         // --- ШАПКА ---
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
                 .shadow(elevation = shadowElevation)
-                .background(Color.Transparent)
+                // ИСПРАВЛЕНО: Сплошной фон перекрывает треки. Тень падает на фон, а не на карточки!
+                // Если в твоем Scaffold фон задан как surface, замени background на surface здесь.
+                .background(MaterialTheme.colorScheme.background)
                 .padding(
                     start = horizontalPadding,
                     end = horizontalPadding,
                     top = topPadding,
-                    bottom = 6.dp
                 )
                 .clipToBounds()
         ) {
-            // ИСПОЛЬЗУЕМ AnimatedVisibility для плавного скрытия/раскрытия
             AnimatedVisibility(
                 visible = titleVisible,
                 enter = expandVertically() + fadeIn(),
@@ -207,7 +210,6 @@ private fun SearchScreen(
             )
         }
 
-        // Индикатор загрузки
         if (state.isLoading) {
             LinearProgressIndicator(
                 modifier = Modifier
@@ -224,13 +226,16 @@ private fun SearchScreen(
         Box(modifier = Modifier.weight(1f)) {
             if (!state.hasQuery) {
                 BrowseGenres(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .nestedScroll(nestedScrollConnection),
                     onGenreClick = { onIntent(SearchIntent.BrowseGenre(it)) },
                 )
             } else {
                 SearchResults(
                     state = state,
                     modifier = Modifier.fillMaxSize(),
+                    nestedScrollConnection = nestedScrollConnection,
                     onIntent = onIntent,
                     onOpenTrack = onOpenTrack,
                     onOpenArtist = onOpenArtist,
@@ -241,12 +246,11 @@ private fun SearchScreen(
     }
 }
 
-// --- Вспомогательные компоненты (без изменений) ---
-
 @Composable
 private fun SearchResults(
     state: SearchUiState,
     modifier: Modifier = Modifier,
+    nestedScrollConnection: NestedScrollConnection,
     onIntent: (SearchIntent) -> Unit,
     onOpenTrack: (String) -> Unit,
     onOpenArtist: (id: String, name: String) -> Unit,
@@ -255,7 +259,8 @@ private fun SearchResults(
     Column(modifier = modifier) {
         TabRow(
             selectedTabIndex = state.selectedTab.ordinal,
-            containerColor = Color.Transparent,
+            // ИСПРАВЛЕНО: TabRow тоже должен иметь сплошной фон, чтобы не просвечивать
+            containerColor = MaterialTheme.colorScheme.background,
             contentColor = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(horizontal = 12.dp),
         ) {
@@ -282,6 +287,8 @@ private fun SearchResults(
             )
             else -> SearchTabContent(
                 state = state,
+                modifier = Modifier.fillMaxSize(),
+                nestedScrollConnection = nestedScrollConnection,
                 onIntent = onIntent,
                 onOpenTrack = onOpenTrack,
                 onOpenArtist = onOpenArtist,
@@ -294,12 +301,15 @@ private fun SearchResults(
 @Composable
 private fun SearchTabContent(
     state: SearchUiState,
+    modifier: Modifier = Modifier,
+    nestedScrollConnection: NestedScrollConnection,
     onIntent: (SearchIntent) -> Unit,
     onOpenTrack: (String) -> Unit,
     onOpenArtist: (id: String, name: String) -> Unit,
     onOpenPlaylist: (id: String, name: String) -> Unit,
 ) {
     LazyColumn(
+        modifier = modifier.nestedScroll(nestedScrollConnection),
         contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
