@@ -21,6 +21,7 @@ gson = "2.13.1"
 retrofit = "3.0.0"
 okhttp = "5.5.0"
 javaxInject = "1"
+material3 = "1.4.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -60,6 +61,7 @@ okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor",
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
