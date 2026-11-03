@@ -103,6 +103,10 @@ include(":feature")
 include(":feature:navigation:api")
 include(":feature:navigation:impl")
 
+// feature/artist
+include(":feature:artist:api")
+include(":feature:artist:impl")
+
 // feature/comments
 include(":feature:comments:api")
 include(":feature:comments:impl")
@@ -110,6 +114,30 @@ include(":feature:comments:impl")
 // feature/detailmusic
 include(":feature:detailmusic:api")
 include(":feature:detailmusic:impl")
+
+// feature/explore
+include(":feature:explore:api")
+include(":feature:explore:impl")
+
+// feature/charts
+include(":feature:charts:api")
+include(":feature:charts:impl")
+
+// feature/playlistdetail
+include(":feature:playlistdetail:api")
+include(":feature:playlistdetail:impl")
+
+// feature/artistcommunity
+include(":feature:artistcommunity:api")
+include(":feature:artistcommunity:impl")
+
+// feature/artistfavorites
+include(":feature:artistfavorites:api")
+include(":feature:artistfavorites:impl")
+
+// feature/tracktools
+include(":feature:tracktools:api")
+include(":feature:tracktools:impl")
 
 // feature/favorites
 include(":feature:favorites:api")

@@ -2,17 +2,20 @@ package com.sona.feature.musiclist.impl.presentation
 
 import com.sona.core.audio.AudioPlayer
 import com.sona.core.audio.PlayerState
+import com.sona.core.common.domain.repository.DiscoveryRepository
 import com.sona.core.common.domain.repository.LibraryRepository
 import com.sona.core.common.domain.repository.MusicRepository
-import com.sona.core.common.domain.usecase.GetArtistTracks
-import com.sona.core.common.domain.usecase.GetPlaylistTracks
-import com.sona.core.common.domain.usecase.GetTrendingTracks
+import com.sona.core.common.domain.usecase.music.GetArtistTracks
+import com.sona.core.common.domain.usecase.music.GetPlaylistTracks
+import com.sona.core.common.domain.usecase.music.GetTrendingTracks
+import com.sona.core.common.domain.usecase.music.GetUndergroundTracks
 import com.sona.core.common.domain.usecase.library.ObserveFavoriteIds
 import com.sona.core.common.domain.usecase.library.ToggleFavorite
 import com.sona.core.common.model.Artist
 import com.sona.core.common.model.Playlist
 import com.sona.core.common.model.SearchResult
 import com.sona.core.common.model.Track
+import intent.MusicListIntent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +25,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import model.MusicListEffect
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -41,6 +45,7 @@ class MusicListViewModelTest {
     )
 
     private val musicRepository = FakeMusicRepository()
+    private val discoveryRepository = FakeDiscoveryRepository()
     private val libraryRepository = FakeLibraryRepository()
     private val audioPlayer = FakeAudioPlayer()
 
@@ -48,6 +53,7 @@ class MusicListViewModelTest {
         getTrendingTracks = GetTrendingTracks(musicRepository),
         getArtistTracks = GetArtistTracks(musicRepository),
         getPlaylistTracks = GetPlaylistTracks(musicRepository),
+        getUndergroundTracks = GetUndergroundTracks(discoveryRepository),
         observeFavoriteIds = ObserveFavoriteIds(libraryRepository),
         toggleFavorite = ToggleFavorite(libraryRepository),
         audioPlayer = audioPlayer,
@@ -106,6 +112,18 @@ class MusicListViewModelTest {
 
         assertEquals("p1", musicRepository.lastPlaylistId)
         assertEquals(tracks, viewModel.state.value.tracks)
+    }
+
+    @Test
+    fun underground_load_uses_discovery_repository() = runTest(mainDispatcherRule.dispatcher) {
+        discoveryRepository.underground = Result.success(tracks)
+        val viewModel = viewModel()
+
+        viewModel.onIntent(MusicListIntent.Load("underground", "all", "Андеграунд"))
+        advanceUntilIdle()
+
+        assertEquals(tracks, viewModel.state.value.tracks)
+        assertEquals(100, discoveryRepository.lastUndergroundLimit)
     }
 
     @Test
@@ -265,6 +283,52 @@ class MusicListViewModelTest {
         }
 
         override suspend fun getCurrentUser(): Result<Artist> = error("unused")
+    }
+
+    private class FakeDiscoveryRepository : DiscoveryRepository {
+        var underground: Result<List<Track>> = Result.success(emptyList())
+        var lastUndergroundLimit: Int? = null
+
+        override suspend fun getUnderground(limit: Int, offset: Int): Result<List<Track>> {
+            lastUndergroundLimit = limit
+            return underground
+        }
+
+        override suspend fun getTrendingPlaylists(
+            time: String,
+            limit: Int,
+            offset: Int,
+        ): Result<List<Playlist>> = error("unused")
+
+        override suspend fun getRelatedTracks(
+            trackId: String,
+            limit: Int,
+            offset: Int,
+        ): Result<List<Track>> = error("unused")
+
+        override suspend fun getRemixes(
+            trackId: String,
+            limit: Int,
+            offset: Int,
+        ): Result<List<Track>> = error("unused")
+
+        override suspend fun getStems(trackId: String): Result<List<Track>> =
+            error("unused")
+
+        override suspend fun getPlaylistFavorites(
+            playlistId: String,
+            limit: Int,
+            offset: Int,
+        ): Result<List<Artist>> = error("unused")
+
+        override suspend fun favoritePlaylist(playlistId: String): Result<Unit> =
+            error("unused")
+
+        override suspend fun unfavoritePlaylist(playlistId: String): Result<Unit> =
+            error("unused")
+
+        override suspend fun getAutocomplete(query: String, limit: Int): Result<List<String>> =
+            error("unused")
     }
 
     private class FakeLibraryRepository : LibraryRepository {

@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -67,6 +68,9 @@ fun HomeRoute(
     viewModelFactory: ViewModelProvider.Factory,
     onOpenTrack: (String) -> Unit,
     onOpenList: (source: String, id: String, title: String) -> Unit,
+    onOpenArtist: (id: String) -> Unit,
+    onOpenExplore: () -> Unit,
+    onOpenCharts: () -> Unit,
     onOpenSearch: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
@@ -88,6 +92,9 @@ fun HomeRoute(
             onIntent = viewModel::onIntent,
             onOpenTrack = onOpenTrack,
             onOpenList = onOpenList,
+            onOpenArtist = onOpenArtist,
+            onOpenExplore = onOpenExplore,
+            onOpenCharts = onOpenCharts,
             onOpenSearch = onOpenSearch,
             onOpenSettings = onOpenSettings,
         )
@@ -106,6 +113,9 @@ private fun HomeScreen(
     onIntent: (HomeIntent) -> Unit,
     onOpenTrack: (String) -> Unit,
     onOpenList: (source: String, id: String, title: String) -> Unit,
+    onOpenArtist: (id: String) -> Unit,
+    onOpenExplore: () -> Unit,
+    onOpenCharts: () -> Unit,
     onOpenSearch: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
@@ -177,7 +187,10 @@ private fun HomeScreen(
                     .padding(horizontal = 20.dp, vertical = 18.dp)
                 // Убрали .alpha(headerAlpha), так как fadeIn/fadeOut делают это плавнее
             ) {
-                HomeHeader(onOpenSettings = onOpenSettings)
+                HomeHeader(
+                    onOpenSettings = onOpenSettings,
+                    onOpenExplore = onOpenExplore,
+                )
                 Spacer(Modifier.height(22.dp))
                 Text(
                     text = "Найди свою следующую навязчивую идею",
@@ -209,11 +222,11 @@ private fun HomeScreen(
                         onClick = { onIntent(HomeIntent.SelectGenre(null)) },
                     )
                 }
-                items(Genres.all, key = { it.name }) { genre ->
+                items(Genres.all, key = { it.apiName }) { genre ->
                     SonaChip(
-                        text = genre.name,
-                        selected = state.selectedGenre == genre.name,
-                        onClick = { onIntent(HomeIntent.SelectGenre(genre.name)) },
+                        text = genre.displayName,
+                        selected = state.selectedGenre == genre.apiName,
+                        onClick = { onIntent(HomeIntent.SelectGenre(genre.apiName)) },
                     )
                 }
             }
@@ -243,6 +256,52 @@ private fun HomeScreen(
                 }
             }
 
+            item("explore") {
+                Surface(
+                    onClick = onOpenExplore,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(22.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+                ) {
+                    Column(modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp)) {
+                        Text(
+                            text = "Обзор Audius",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = "Плейлисты недели, андеграунд и новые имена открытой сети.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+
+            item("charts") {
+                Surface(
+                    onClick = onOpenCharts,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(22.dp),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
+                ) {
+                    Column(modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp)) {
+                        Text(
+                            text = "Чарты Audius",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = "Топ недели, месяца и за всё время — с фильтром по жанрам.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+
             if (state.isLoading && state.tracks.isEmpty()) {
                 item("loading") { LoadingState() }
             } else if (state.error != null && state.tracks.isEmpty()) {
@@ -262,15 +321,16 @@ private fun HomeScreen(
 
             if (trendingTracks.isNotEmpty()) {
                 item("trending-header") {
+                    val selectedGenre = Genres.byApiName(state.selectedGenre)
                     SectionHeader(
-                        title = if (state.selectedGenre == null) "Сейчас это в тренде" else "${state.selectedGenre} жара",
+                        title = if (selectedGenre == null) "Сейчас это в тренде"
+                        else "${selectedGenre.displayName}: самое горячее",
                         action = "Увидеть все",
                         onAction = {
-                            val genre = state.selectedGenre
-                            if (genre == null) {
+                            if (selectedGenre == null) {
                                 onOpenList("trending", "all", "Trending now")
                             } else {
-                                onOpenList("genre", genre, genre)
+                                onOpenList("genre", selectedGenre.apiName, selectedGenre.displayName)
                             }
                         },
                     )
@@ -318,7 +378,7 @@ private fun HomeScreen(
                         items(state.artists, key = { it.id }) { artist ->
                             ArtistTile(
                                 artist = artist,
-                                onClick = { onOpenList("artist", artist.id, artist.displayName) },
+                                onClick = { onOpenArtist(artist.id) },
                             )
                         }
                     }

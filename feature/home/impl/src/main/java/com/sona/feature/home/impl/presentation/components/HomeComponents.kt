@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Explore
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Search
@@ -45,6 +46,7 @@ import com.sona.core.ui.format.greetingForNow
 @Composable
 fun HomeHeader(
     onOpenSettings: () -> Unit,
+    onOpenExplore: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -66,6 +68,13 @@ fun HomeHeader(
             )
         }
         Spacer(Modifier.weight(1f))
+        IconButton(onClick = onOpenExplore) {
+            Icon(
+                imageVector = Icons.Rounded.Explore,
+                contentDescription = "Explore",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         IconButton(onClick = onOpenSettings) {
             Icon(
                 imageVector = Icons.Rounded.Settings,

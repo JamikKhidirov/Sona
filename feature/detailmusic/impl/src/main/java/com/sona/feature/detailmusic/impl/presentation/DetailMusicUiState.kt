@@ -6,6 +6,7 @@ data class DetailMusicUiState(
     val isLoading: Boolean = true,
     val track: Track? = null,
     val related: List<Track> = emptyList(),
+    val remixes: List<Track> = emptyList(),
     val isFavorite: Boolean = false,
     val currentTrackId: String? = null,
     val isPlaying: Boolean = false,

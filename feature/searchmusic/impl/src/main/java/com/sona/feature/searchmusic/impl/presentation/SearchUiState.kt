@@ -31,7 +31,12 @@ sealed interface SearchIntent {
     data class TabSelected(val tab: SearchTab) : SearchIntent
     data class PlayTrack(val track: Track) : SearchIntent
     data class ToggleFavorite(val track: Track) : SearchIntent
-    data class BrowseGenre(val genre: String) : SearchIntent
+    data class BrowseGenre(
+        /** English value sent to the Audius search API. */
+        val genre: String,
+        /** Localized label kept in the search field. */
+        val displayName: String = genre,
+    ) : SearchIntent
     data object Retry : SearchIntent
     data object ClearQuery : SearchIntent
 }

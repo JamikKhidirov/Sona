@@ -4,13 +4,14 @@ import com.sona.core.audio.AudioPlayer
 import com.sona.core.audio.PlayerState
 import com.sona.core.common.domain.repository.LibraryRepository
 import com.sona.core.common.domain.repository.MusicRepository
-import com.sona.core.common.domain.usecase.GetTrendingTracks
+import com.sona.core.common.domain.usecase.music.GetTrendingTracks
 import com.sona.core.common.domain.usecase.library.ObserveFavoriteIds
 import com.sona.core.common.domain.usecase.library.ToggleFavorite
 import com.sona.core.common.model.Artist
 import com.sona.core.common.model.Playlist
 import com.sona.core.common.model.SearchResult
 import com.sona.core.common.model.Track
+import intent.HomeIntent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +21,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import model.HomeEffect
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -77,7 +79,10 @@ class HomeViewModelTest {
         val viewModel = viewModel()
         advanceUntilIdle()
 
-        assertEquals("No tracks found for this vibe yet.", viewModel.state.value.error)
+        assertEquals(
+            "Пока не найдено ни одного трека, соответствующего этой атмосфере.",
+            viewModel.state.value.error,
+        )
         assertNull(viewModel.state.value.featured)
     }
 
@@ -96,7 +101,10 @@ class HomeViewModelTest {
             viewModel.onIntent(HomeIntent.Retry)
             advanceUntilIdle()
 
-            assertEquals("Couldn't reach Audius. Check your connection.", viewModel.state.value.error)
+            assertEquals(
+                "Не удалось дозвониться до Audius. Проверьте соединение.",
+                viewModel.state.value.error,
+            )
         }
 
     @Test
@@ -176,14 +184,14 @@ class HomeViewModelTest {
             advanceUntilIdle()
 
             assertEquals(tracks[0], libraryRepository.lastToggled)
-            assertEquals(listOf(HomeEffect.Message("Saved to favorites")), effects)
+            assertEquals(listOf(HomeEffect.Message("Сохранено в избранном")), effects)
 
             libraryRepository.favoriteIdsFlow.value = setOf("t1")
             advanceUntilIdle()
             viewModel.onIntent(HomeIntent.ToggleFavorite(tracks[0]))
             advanceUntilIdle()
 
-            assertEquals(HomeEffect.Message("Removed from favorites"), effects.last())
+            assertEquals(HomeEffect.Message("Удалено из избранного"), effects.last())
         }
 
     @Test

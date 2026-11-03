@@ -10,8 +10,17 @@ import com.sona.core.common.domain.usecase.library.ObserveFavoriteIds
 import com.sona.core.common.domain.usecase.library.ObserveFavorites
 import com.sona.core.common.domain.usecase.library.ObserveRecentlyPlayed
 import com.sona.core.common.domain.usecase.library.ToggleFavorite
+import com.sona.core.common.domain.usecase.music.GetArtist
+import com.sona.core.common.domain.usecase.music.GetArtistTracks
 import com.sona.core.common.domain.usecase.music.GetCurrentUser
+import com.sona.core.common.domain.usecase.music.GetPlaylist
+import com.sona.core.common.domain.usecase.music.GetPlaylistTracks
+import com.sona.core.common.domain.usecase.music.GetTrack
+import com.sona.core.common.domain.usecase.music.GetTrendingTracks
+import com.sona.core.common.domain.usecase.music.SearchCatalog
+import com.sona.core.common.domain.usecase.settings.ObserveSettings
 import com.sona.core.common.domain.usecase.settings.SetApiToken
+import com.sona.core.common.domain.usecase.settings.SetThemeMode
 import com.sona.core.common.model.Artist
 import com.sona.core.common.model.Playlist
 import com.sona.core.common.model.SearchResult

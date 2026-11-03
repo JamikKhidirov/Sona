@@ -9,5 +9,7 @@ data class Playlist(
     val trackCount: Int = 0,
     val playCount: Long = 0,
     val isAlbum: Boolean = false,
+    val ownerId: String? = null,
+    val permalink: String? = null,
     val tracks: List<Track> = emptyList(),
 )

@@ -13,6 +13,7 @@ import com.sona.core.network.audius.api.SearchApi
 import com.sona.core.network.audius.api.TrackApi
 import com.sona.core.network.audius.api.UserApi
 import com.sona.core.network.audius.di.ApiModule
+import com.sona.core.network.audius.di.CatalogModule
 import com.sona.core.network.audius.di.MusicModule
 import com.sona.core.network.audius.di.NetworkModule
 import dagger.BindsInstance
@@ -26,6 +27,7 @@ import javax.inject.Singleton
         NetworkModule::class,
         ApiModule::class,
         MusicModule::class,
+        CatalogModule::class,
         CoreDataModule::class,
         DeviceDataModule::class,
         AudioModule::class,

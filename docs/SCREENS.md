@@ -19,6 +19,14 @@
 - [Profile](#profile)
 - [Track details](#track-details)
 - [Collection](#collection)
+- [Artist](#artist)
+- [Comments](#comments)
+- [Explore](#explore)
+- [Charts](#charts)
+- [Playlist detail](#playlist-detail)
+- [Artist community](#artist-community)
+- [Artist favorites](#artist-favorites)
+- [Track tools](#track-tools)
 - [Player](#player)
 - [Settings](#settings)
 - [Навигационная оболочка](#навигационная-оболочка)
@@ -86,6 +94,14 @@ flowchart TD
 | 7 | Collection | `collection?source={source}&id={id}&title={title}` | `feature/musiclist/**` |
 | 8 | Player | `player` | `feature/player/**` |
 | 9 | Settings | `settings` | `feature/settings/**` |
+| 10 | Artist | `artist/{artistId}` | `feature/artist/**` |
+| 11 | Comments | `track/{trackId}/comments` | `feature/comments/**` |
+| 12 | Explore | `explore` | `feature/explore/**` |
+| 13 | Charts | `charts` | `feature/charts/**` |
+| 14 | Playlist detail | `playlist/{playlistId}` | `feature/playlistdetail/**` |
+| 15 | Artist community | `artist/{artistId}/community` | `feature/artistcommunity/**` |
+| 16 | Artist favorites | `artist/{artistId}/favorites` | `feature/artistfavorites/**` |
+| 17 | Track tools | `track/{trackId}/tools` | `feature/tracktools/**` |
 
 ---
 
@@ -564,6 +580,141 @@ data class MusicListUiState(
 
 ---
 
+## Artist
+
+**Файлы:** `feature/artist/impl/presentation/` (`ArtistScreen.kt`, `ArtistUiState.kt`,
+`ArtistViewModel.kt`, `components/ArtistHero.kt`).
+
+| Параметр | Значение |
+|---|---|
+| Route | `artist/{artistId}` |
+| Данные | `GetArtistCatalog` → профиль, треки, плейлисты, похожие артисты |
+| Интенты | `Load`, `Retry`, `PlayTrack`, `PlayAll`, `ToggleFavorite`, `ToggleFollow` |
+| Эффекты | snackbar о подписке / лайке |
+
+`GetArtistCatalog` грузит профиль обязательно, а треки, плейлисты и related —
+best-effort в `supervisorScope`: падение одной секции не скрывает остальные.
+
+Переходы: трек → `track/{trackId}`, плейлист → `playlist/{playlistId}`,
+похожий артист → `artist/{artistId}`, «Сообщество» →
+`artist/{artistId}/community`, «Избранное» → `artist/{artistId}/favorites`.
+
+---
+
+## Comments
+
+**Файлы:** `feature/comments/impl/presentation/`.
+
+| Параметр | Значение |
+|---|---|
+| Route | `track/{trackId}/comments` |
+| Данные | `GetTrackComments` / `PostTrackComment` |
+| Интенты | `Load`, `Retry`, `DraftChanged`, `Submit` |
+| Эффекты | snackbar об отправке и ошибках |
+
+Без токена Audius отправка комментария возвращает ошибку — она показывается
+в snackbar, список остаётся доступным для чтения.
+
+---
+
+## Explore
+
+**Файлы:** `feature/explore/impl/presentation/`.
+
+| Параметр | Значение |
+|---|---|
+| Route | `explore` |
+| Вкладки | `PLAYLISTS` (трендовые плейлисты) и `UNDERGROUND` |
+| Данные | `GetTrendingPlaylists`, `GetUndergroundTracks` |
+| Интенты | `Load`, `Retry`, `SelectTab`, `PlayTrack`, `ToggleFavorite` |
+
+Вход — карточка «Обзор Audius» на Home. Плейлист открывается в
+`playlist/{playlistId}`, трек — в `track/{trackId}`.
+
+---
+
+## Charts
+
+**Файлы:** `feature/charts/impl/presentation/`.
+
+| Параметр | Значение |
+|---|---|
+| Route | `charts` |
+| Данные | `GetTrendingTracks(genre, time, limit = 100)` |
+| Периоды | неделя / месяц / год / всё время (`week`, `month`, `year`, `allTime`) |
+| Жанры | русские подписи, на сервер уходит канонический английский `apiName` |
+| Интенты | `Load`, `Retry`, `SelectPeriod`, `SelectGenre`, `PlayTrack`, `ToggleFavorite` |
+
+Каждая строка показывает позицию в чарте, обложку, артиста, жанр,
+длительность, лайк и play/pause. Вход — карточка «Чарты Audius» на Home.
+
+---
+
+## Playlist detail
+
+**Файлы:** `feature/playlistdetail/impl/presentation/`.
+
+| Параметр | Значение |
+|---|---|
+| Route | `playlist/{playlistId}` |
+| Данные | `GetPlaylist`, `GetPlaylistTracks`, `GetPlaylistFavorites` |
+| Интенты | `Load`, `Retry`, `PlayTrack`, `PlayAll`, `ToggleTrackFavorite`, `TogglePlaylistFavorite` |
+| Эффекты | snackbar о сохранении плейлиста и лайках |
+
+Экран показывает hero-обложку, владельца, количество треков, суммарную
+длительность, прослушивания, описание, блок «Сохранили» (артисты) и список
+треков. «Сохранить» вызывает `TogglePlaylistFavorite`; без токена показывается
+подсказка открыть настройки.
+
+---
+
+## Artist community
+
+**Файлы:** `feature/artistcommunity/impl/presentation/`.
+
+| Параметр | Значение |
+|---|---|
+| Route | `artist/{artistId}/community` |
+| Вкладки | «Подписчики» (`users/{id}/followers`) и «Подписки» (`users/{id}/following`) |
+| Данные | `GetArtist`, `GetArtistFollowers`, `GetArtistFollowing` |
+| Интенты | `Load`, `Retry`, `SelectTab` |
+
+Списки грузятся параллельно; если упали все три запроса — `ErrorState`,
+иначе показывается то, что удалось получить. Переход — на профиль артиста.
+
+---
+
+## Artist favorites
+
+**Файлы:** `feature/artistfavorites/impl/presentation/`.
+
+| Параметр | Значение |
+|---|---|
+| Route | `artist/{artistId}/favorites` |
+| Данные | `GetArtist`, `GetArtistFavorites` (`users/{id}/favorites`) |
+| Интенты | `Load`, `Retry`, `PlayTrack`, `PlayAll`, `ToggleFavorite` |
+
+Показывает треки, которые артист сохранил в своей библиотеке, с общим
+временем и кнопкой «Слушать всё».
+
+---
+
+## Track tools
+
+**Файлы:** `feature/tracktools/impl/presentation/`.
+
+| Параметр | Значение |
+|---|---|
+| Route | `track/{trackId}/tools` |
+| Вкладки | «Ремиксы» (`tracks/{id}/remixes`) и «Стемы» (`tracks/{id}/stems`) |
+| Данные | `GetTrack`, `GetTrackRemixes`, `GetTrackStems` |
+| Интенты | `Load`, `Retry`, `SelectTab`, `PlayTrack`, `ToggleFavorite` |
+
+Вход — кнопка с иконкой `Tune` в блоке вторичных действий экрана трека.
+Пустые вкладки объясняют, что автор не публиковал альтернативные версии.
+
+---
+
 ## Player
 
 **Файлы:**
@@ -760,6 +911,14 @@ navController.navigate(route) {
 | Profile | hero-skeleton по флагу | локальный профиль | текст ошибки | — |
 | Track | `LoadingState` | — | `ErrorState` + Retry | snackbar |
 | Collection | `LoadingState` | «No tracks here» | `ErrorState` + Retry | snackbar |
+| Artist | `LoadingState` | секции скрыты | `ErrorState` + Retry | snackbar |
+| Comments | `LoadingState` | «Пока нет комментариев» | `ErrorState` + Retry | snackbar |
+| Explore | `LoadingState` | пустая вкладка | `ErrorState` + Retry | snackbar |
+| Charts | `LoadingState` | «Чарт пуст» | `ErrorState` + Retry | snackbar |
+| Playlist detail | `LoadingState` | — | `ErrorState` + Retry | snackbar |
+| Artist community | `LoadingState` | «Пока нет подписчиков» | `ErrorState` + Retry | — |
+| Artist favorites | `LoadingState` | «Избранное пусто» | `ErrorState` + Retry | snackbar |
+| Track tools | `LoadingState` | «Ремиксов пока нет» | `ErrorState` + Retry | snackbar |
 | Player | буферизация в футере | «Nothing playing» | текст ошибки | — |
 | Settings | — | — | — | snackbar + диалог |
 

@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.ChatBubbleOutline
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.Headphones
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.QueueMusic
 import androidx.compose.material.icons.rounded.Repeat
 import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -64,6 +66,8 @@ fun DetailMusicRoute(
     onBack: () -> Unit,
     onOpenTrack: (String) -> Unit,
     onOpenArtist: (id: String, name: String) -> Unit,
+    onOpenComments: (String) -> Unit,
+    onOpenTools: (String) -> Unit,
 ) {
     val viewModel: DetailMusicViewModel = viewModel(factory = viewModelFactory)
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -87,6 +91,8 @@ fun DetailMusicRoute(
             onBack = onBack,
             onOpenTrack = onOpenTrack,
             onOpenArtist = onOpenArtist,
+            onOpenComments = onOpenComments,
+            onOpenTools = onOpenTools,
         )
         SnackbarHost(
             hostState = snackbarHostState,
@@ -104,6 +110,8 @@ private fun DetailMusicScreen(
     onBack: () -> Unit,
     onOpenTrack: (String) -> Unit,
     onOpenArtist: (id: String, name: String) -> Unit,
+    onOpenComments: (String) -> Unit,
+    onOpenTools: (String) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -156,6 +164,8 @@ private fun DetailMusicScreen(
                 onIntent = onIntent,
                 onOpenTrack = onOpenTrack,
                 onOpenArtist = onOpenArtist,
+                onOpenComments = onOpenComments,
+                onOpenTools = onOpenTools,
             )
         }
     }
@@ -168,6 +178,8 @@ private fun DetailContent(
     onIntent: (DetailMusicIntent) -> Unit,
     onOpenTrack: (String) -> Unit,
     onOpenArtist: (id: String, name: String) -> Unit,
+    onOpenComments: (String) -> Unit,
+    onOpenTools: (String) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -218,6 +230,20 @@ private fun DetailContent(
                     icon = Icons.Rounded.QueueMusic,
                     contentDescription = "Add to queue",
                     onClick = { onIntent(DetailMusicIntent.AddToQueue(track)) },
+                    size = 46.dp,
+                )
+                Spacer(Modifier.size(12.dp))
+                CircleIconButton(
+                    icon = Icons.Rounded.ChatBubbleOutline,
+                    contentDescription = "Comments",
+                    onClick = { onOpenComments(track.id) },
+                    size = 46.dp,
+                )
+                Spacer(Modifier.size(12.dp))
+                CircleIconButton(
+                    icon = Icons.Rounded.Tune,
+                    contentDescription = "Remixes and stems",
+                    onClick = { onOpenTools(track.id) },
                     size = 46.dp,
                 )
                 Spacer(Modifier.size(12.dp))
@@ -295,6 +321,22 @@ private fun DetailContent(
                     isPlaying = state.isPlaying,
                     onClick = { onOpenTrack(related.id) },
                     onPlay = { onIntent(DetailMusicIntent.Play(related)) },
+                    showFavorite = false,
+                )
+            }
+        }
+
+        if (state.remixes.isNotEmpty()) {
+            item("remixes-header") {
+                SectionHeader(title = "Ремиксы")
+            }
+            items(state.remixes, key = { it.id }) { remix ->
+                TrackRow(
+                    track = remix,
+                    isActive = state.currentTrackId == remix.id,
+                    isPlaying = state.isPlaying,
+                    onClick = { onOpenTrack(remix.id) },
+                    onPlay = { onIntent(DetailMusicIntent.Play(remix)) },
                     showFavorite = false,
                 )
             }

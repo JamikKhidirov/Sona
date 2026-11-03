@@ -2,16 +2,20 @@ package com.sona.feature.detailmusic.impl.presentation
 
 import com.sona.core.audio.AudioPlayer
 import com.sona.core.audio.PlayerState
+import com.sona.core.common.domain.repository.DiscoveryRepository
 import com.sona.core.common.domain.repository.LibraryRepository
 import com.sona.core.common.domain.repository.MusicRepository
-import com.sona.core.common.domain.usecase.GetTrack
-import com.sona.core.common.domain.usecase.GetTrendingTracks
+import com.sona.core.common.domain.usecase.music.GetRelatedTracks
+import com.sona.core.common.domain.usecase.music.GetTrack
+import com.sona.core.common.domain.usecase.music.GetTrackRemixes
+import com.sona.core.common.domain.usecase.music.GetTrendingTracks
 import com.sona.core.common.domain.usecase.library.ObserveFavorites
 import com.sona.core.common.domain.usecase.library.ToggleFavorite
 import com.sona.core.common.model.Artist
 import com.sona.core.common.model.Playlist
 import com.sona.core.common.model.SearchResult
 import com.sona.core.common.model.Track
+import intent.DetailMusicIntent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +25,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import model.DetailMusicEffect
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -43,12 +48,15 @@ class DetailMusicViewModelTest {
     )
 
     private val musicRepository = FakeMusicRepository()
+    private val discoveryRepository = FakeDiscoveryRepository()
     private val libraryRepository = FakeLibraryRepository()
     private val audioPlayer = FakeAudioPlayer()
 
     private fun viewModel() = DetailMusicViewModel(
         getTrack = GetTrack(musicRepository),
         getTrendingTracks = GetTrendingTracks(musicRepository),
+        getRelatedTracks = GetRelatedTracks(discoveryRepository),
+        getTrackRemixes = GetTrackRemixes(discoveryRepository),
         observeFavorites = ObserveFavorites(libraryRepository),
         toggleFavorite = ToggleFavorite(libraryRepository),
         audioPlayer = audioPlayer,
@@ -247,6 +255,50 @@ class DetailMusicViewModelTest {
         override suspend fun getPlaylistTracks(playlistId: String): Result<List<Track>> = error("unused")
 
         override suspend fun getCurrentUser(): Result<Artist> = error("unused")
+    }
+
+    private class FakeDiscoveryRepository : DiscoveryRepository {
+        var related: Result<List<Track>> = Result.failure(IllegalStateException("not stubbed"))
+        var remixes: Result<List<Track>> = Result.success(emptyList())
+
+        override suspend fun getUnderground(limit: Int, offset: Int): Result<List<Track>> =
+            error("unused")
+
+        override suspend fun getTrendingPlaylists(
+            time: String,
+            limit: Int,
+            offset: Int,
+        ): Result<List<Playlist>> = error("unused")
+
+        override suspend fun getRelatedTracks(
+            trackId: String,
+            limit: Int,
+            offset: Int,
+        ): Result<List<Track>> = related
+
+        override suspend fun getRemixes(
+            trackId: String,
+            limit: Int,
+            offset: Int,
+        ): Result<List<Track>> = remixes
+
+        override suspend fun getStems(trackId: String): Result<List<Track>> =
+            error("unused")
+
+        override suspend fun getPlaylistFavorites(
+            playlistId: String,
+            limit: Int,
+            offset: Int,
+        ): Result<List<Artist>> = error("unused")
+
+        override suspend fun favoritePlaylist(playlistId: String): Result<Unit> =
+            error("unused")
+
+        override suspend fun unfavoritePlaylist(playlistId: String): Result<Unit> =
+            error("unused")
+
+        override suspend fun getAutocomplete(query: String, limit: Int): Result<List<String>> =
+            error("unused")
     }
 
     private class FakeLibraryRepository : LibraryRepository {
