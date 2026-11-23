@@ -6,7 +6,9 @@ plugins {
 android {
     namespace = "com.sona.core.audio.impl"
     compileSdk {
-        version = release(37)
+        version = release(37) {
+            minorApiLevel = 1
+        }
     }
 
     defaultConfig {
