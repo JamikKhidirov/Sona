@@ -1,12 +1,16 @@
 package com.sona.feature.home.impl.presentation
 
+import android.R.attr.translationY
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,11 +21,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -32,7 +39,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +49,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -107,6 +117,8 @@ fun HomeRoute(
     }
 }
 
+
+
 @Composable
 private fun HomeScreen(
     state: HomeUiState,
@@ -119,285 +131,358 @@ private fun HomeScreen(
     onOpenSearch: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
-    val density = LocalDensity.current
-    // Дистанция, после которой шапка полностью скрывается
-    val maxScrollPx = with(density) { 150.dp.toPx() }
+    // 1. Логика первого запуска (без дергания при обновлении)
+    val isFirstLaunch = rememberSaveable { mutableStateOf(true) }
+    val isInitialLoading = state.isLoading && state.tracks.isEmpty() && state.featured == null
 
+    LaunchedEffect(isInitialLoading) {
+        if (!isInitialLoading && isFirstLaunch.value) {
+            isFirstLaunch.value = false
+        }
+    }
+
+    val showFullScreenLoader = isFirstLaunch.value && isInitialLoading
+
+    val density = LocalDensity.current
+    val maxScrollPx = with(density) { 150.dp.toPx() }
     var scrollOffsetPx by remember { mutableFloatStateOf(0f) }
 
     val scrollProgress by remember {
         derivedStateOf { (scrollOffsetPx / maxScrollPx).coerceIn(0f, 1f) }
     }
-
     val headerVisible = scrollProgress < 0.8f
 
-    // ИСПРАВЛЕНО: Корректная математика NestedScrollConnection для сворачивания/разворачивания
-    val nestedScrollConnection = remember {
+    // 2. Стейт списка для отслеживания позиции
+    val lazyListState = rememberLazyListState()
+
+    // 3. ИСПРАВЛЕННАЯ ЛОГИКА СКРОЛЛА (Без залипания)
+    // Список скроллится до самого верха -> ТОЛЬКО ПОТОМ открывается шапка.
+    // При скролле вниз шапка закрывается сразу.
+    val nestedScrollConnection = remember(lazyListState) {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 val delta = available.y
-                val newOffset = (scrollOffsetPx - delta).coerceIn(0f, maxScrollPx)
-                val consumed = newOffset - scrollOffsetPx
-                scrollOffsetPx = newOffset
-                // Возвращаем потребленную часть скролла
-                return Offset(0f, -consumed)
-            }
+                val isListAtTop = lazyListState.firstVisibleItemIndex == 0 &&
+                        lazyListState.firstVisibleItemScrollOffset == 0
 
-            override fun onPostScroll(
-                consumed: Offset,
-                available: Offset,
-                source: NestedScrollSource
-            ): Offset {
-                // Разворачиваем шапку при скролле вниз, если есть запас
-                if (available.y > 0f && scrollOffsetPx > 0f) {
-                    val newOffset = (scrollOffsetPx - available.y).coerceIn(0f, maxScrollPx)
-                    val consumedHere = scrollOffsetPx - newOffset
+                // delta < 0: Палец вверх (скроллим контент вниз) -> СКРЫВАЕМ шапку
+                if (delta < 0 && scrollOffsetPx < maxScrollPx) {
+                    val newOffset = (scrollOffsetPx - delta).coerceIn(0f, maxScrollPx)
+                    val consumed = newOffset - scrollOffsetPx
                     scrollOffsetPx = newOffset
-                    return Offset(0f, consumedHere)
+                    return Offset(0f, -consumed)
                 }
+
+                // delta > 0: Палец вниз (скроллим контент вверх) -> ОТКРЫВАЕМ шапку
+                // Открываем ТОЛЬКО если лента уже в самом верху
+                if (delta > 0 && scrollOffsetPx > 0f && isListAtTop) {
+                    val newOffset = (scrollOffsetPx - delta).coerceIn(0f, maxScrollPx)
+                    val consumed = newOffset - scrollOffsetPx
+                    scrollOffsetPx = newOffset
+                    return Offset(0f, -consumed)
+                }
+
                 return Offset.Zero
             }
         }
     }
 
-    // УБРАЛИ .nestedScroll отсюда, так как корневой Column не скроллится
-    Column(
+    // 4. ИСПРАВЛЕНО: Цвет панели жанров теперь идеально совпадает с фоном
+
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background) // Явный фон
             .statusBarsPadding()
     ) {
-        // --- ВЕРХНЯЯ ЧАСТЬ (Лого + Заголовок + Поиск) ---
-        // ИСПРАВЛЕНО: Красивые и плавные переходы через AnimatedVisibility
+        // --- ИНДИКАТОР ЗАГРУЗКИ ---
         AnimatedVisibility(
-            visible = headerVisible,
-            enter = fadeIn(animationSpec = tween(250, easing = FastOutSlowInEasing)) +
-                    expandVertically(
-                        expandFrom = Alignment.Top,
-                        animationSpec = tween(350, easing = FastOutSlowInEasing)
+            visible = showFullScreenLoader,
+            enter = fadeIn(animationSpec = tween(300)),
+            exit = fadeOut(animationSpec = tween(400, easing = FastOutSlowInEasing))
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                LoadingState()
+            }
+        }
+
+        // --- ОСНОВНОЙ ЭКРАН ---
+        AnimatedVisibility(
+            visible = !showFullScreenLoader,
+            enter = fadeIn(animationSpec = tween(600, easing = FastOutSlowInEasing)) +
+                    slideInVertically(
+                        initialOffsetY = { fullHeight -> fullHeight / 4 },
+                        animationSpec = tween(600, easing = FastOutSlowInEasing)
                     ),
-            exit = fadeOut(animationSpec = tween(250, easing = FastOutSlowInEasing)) +
-                    shrinkVertically(
-                        shrinkTowards = Alignment.Top,
-                        animationSpec = tween(350, easing = FastOutSlowInEasing)
-                    )
+            exit = fadeOut(animationSpec = tween(300))
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 18.dp)
-                // Убрали .alpha(headerAlpha), так как fadeIn/fadeOut делают это плавнее
-            ) {
-                HomeHeader(
-                    onOpenSettings = onOpenSettings,
-                    onOpenExplore = onOpenExplore,
-                )
-                Spacer(Modifier.height(22.dp))
-                Text(
-                    text = "Найди свою следующую навязчивую идею",
-                    style = MaterialTheme.typography.displayMedium,
-                    color = MaterialTheme.colorScheme.onBackground, // Правильный цвет для обеих тем
-                )
-                Spacer(Modifier.height(18.dp))
-                HomeSearchPill(onClick = onOpenSearch)
-            }
-        }
+            Column(modifier = Modifier.fillMaxSize()) {
 
-        // --- ЛИПКИЕ ЖАНРЫ ---
-        // ИСПРАВЛЕНО: Цвета и тени для идеального отображения в темной и светлой теме
-        Surface(
-            color = Color.Transparent,
-            tonalElevation = if (scrollProgress > 0.05f) 3.dp else 0.dp, // Современный M3 эффект "приподнятости"
-            modifier = Modifier
-                .fillMaxWidth()
-            // Убрали .shadow и .background, Surface сам отлично справляется с фоном и тенью
-        ) {
-            LazyRow(
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                item("all") {
-                    SonaChip(
-                        text = "Все",
-                        selected = state.selectedGenre == null,
-                        onClick = { onIntent(HomeIntent.SelectGenre(null)) },
-                    )
-                }
-                items(Genres.all, key = { it.apiName }) { genre ->
-                    SonaChip(
-                        text = genre.displayName,
-                        selected = state.selectedGenre == genre.apiName,
-                        onClick = { onIntent(HomeIntent.SelectGenre(genre.apiName)) },
-                    )
-                }
-            }
-        }
-
-        // --- СКРОЛЛЯЩИЙСЯ КОНТЕНТ (Лента) ---
-        val trendingTracks = remember(state.trending) { state.trending.take(8) }
-
-        LazyColumn(
-            // ИСПРАВЛЕНО: .nestedScroll применен именно к скроллящемуся элементу
-            modifier = Modifier
-                .fillMaxSize()
-                .weight(1f)
-                .nestedScroll(nestedScrollConnection),
-            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 26.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp),
-        ) {
-            val featured = state.featured
-            if (featured != null) {
-                item("featured") {
-                    FeaturedTrackCard(
-                        track = featured,
-                        isPlaying = state.currentTrackId == featured.id && state.isPlaying,
-                        onClick = { onOpenTrack(featured.id) },
-                        onPlay = { onIntent(HomeIntent.PlayFeatured) },
-                    )
-                }
-            }
-
-            item("explore") {
-                Surface(
-                    onClick = onOpenExplore,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(22.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+                // --- ВЕРХНЯЯ ЧАСТЬ (Лого + Заголовок + Поиск) ---
+                AnimatedVisibility(
+                    visible = headerVisible,
+                    enter = fadeIn(animationSpec = tween(250, easing = FastOutSlowInEasing)) +
+                            expandVertically(
+                                expandFrom = Alignment.Top,
+                                animationSpec = tween(350, easing = FastOutSlowInEasing)
+                            ),
+                    exit = fadeOut(animationSpec = tween(250, easing = FastOutSlowInEasing)) +
+                            shrinkVertically(
+                                shrinkTowards = Alignment.Top,
+                                animationSpec = tween(350, easing = FastOutSlowInEasing)
+                            )
                 ) {
-                    Column(modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp)) {
-                        Text(
-                            text = "Обзор Audius",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 18.dp)
+                    ) {
+                        HomeHeader(
+                            onOpenSettings = onOpenSettings,
+                            onOpenExplore = onOpenExplore,
                         )
-                        Spacer(Modifier.height(4.dp))
+                        Spacer(Modifier.height(22.dp))
                         Text(
-                            text = "Плейлисты недели, андеграунд и новые имена открытой сети.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            text = "Найди свою следующую навязчивую идею",
+                            style = MaterialTheme.typography.displayMedium,
+                            color = MaterialTheme.colorScheme.onBackground,
                         )
+                        Spacer(Modifier.height(18.dp))
+                        HomeSearchPill(onClick = onOpenSearch)
                     }
                 }
-            }
 
-            item("charts") {
+                // --- ЛИПКИЕ ЖАНРЫ ---
                 Surface(
-                    onClick = onOpenCharts,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(22.dp),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
+                    color = MaterialTheme.colorScheme.background, // Динамический цвет
+                    tonalElevation = if (scrollProgress > 0.05f) 3.dp else 0.dp,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Column(modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp)) {
-                        Text(
-                            text = "Чарты Audius",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            text = "Топ недели, месяца и за всё время — с фильтром по жанрам.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-            }
-
-            if (state.isLoading && state.tracks.isEmpty()) {
-                item("loading") { LoadingState() }
-            } else if (state.error != null && state.tracks.isEmpty()) {
-                item("error") {
-                    ErrorState(message = state.error.orEmpty(), onRetry = { onIntent(HomeIntent.Retry) })
-                }
-            } else if (state.tracks.isEmpty()) {
-                item("empty") {
-                    EmptyState(
-                        title = "На циферблате ничего нет",
-                        message = "Попробуйте другой жанр или обновите ленту.",
-                        actionText = "Обновить",
-                        onAction = { onIntent(HomeIntent.Retry) },
-                    )
-                }
-            }
-
-            if (trendingTracks.isNotEmpty()) {
-                item("trending-header") {
-                    val selectedGenre = Genres.byApiName(state.selectedGenre)
-                    SectionHeader(
-                        title = if (selectedGenre == null) "Сейчас это в тренде"
-                        else "${selectedGenre.displayName}: самое горячее",
-                        action = "Увидеть все",
-                        onAction = {
-                            if (selectedGenre == null) {
-                                onOpenList("trending", "all", "Trending now")
-                            } else {
-                                onOpenList("genre", selectedGenre.apiName, selectedGenre.displayName)
-                            }
-                        },
-                    )
-                }
-                items(trendingTracks, key = { it.id }) { track ->
-                    TrackRow(
-                        track = track,
-                        isActive = state.currentTrackId == track.id,
-                        isPlaying = state.isPlaying,
-                        isFavorite = state.favoriteIds.contains(track.id),
-                        onClick = { onOpenTrack(track.id) },
-                        onPlay = { onIntent(HomeIntent.PlayTrack(track)) },
-                        onFavorite = { onIntent(HomeIntent.ToggleFavorite(track)) },
-                    )
-                }
-            }
-
-            if (state.freshDrops.isNotEmpty()) {
-                item("fresh-header") {
-                    SectionHeader(title = "Свежие капли", action = "Исследовать") {
-                        onOpenList("trending", "all", "Fresh drops")
-                    }
-                }
-                item("fresh-list") {
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(state.freshDrops, key = { it.id }) { track ->
-                            TrackTile(
-                                track = track,
-                                isActive = state.currentTrackId == track.id,
-                                isPlaying = state.isPlaying,
-                                onClick = { onOpenTrack(track.id) },
-                                onPlay = { onIntent(HomeIntent.PlayTrack(track)) },
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        item("all") {
+                            SonaChip(
+                                text = "Все",
+                                selected = state.selectedGenre == null,
+                                onClick = { onIntent(HomeIntent.SelectGenre(null)) },
+                            )
+                        }
+                        items(Genres.all, key = { it.apiName }) { genre ->
+                            SonaChip(
+                                text = genre.displayName,
+                                selected = state.selectedGenre == genre.apiName,
+                                onClick = { onIntent(HomeIntent.SelectGenre(genre.apiName)) },
                             )
                         }
                     }
                 }
-            }
 
-            if (state.artists.isNotEmpty()) {
-                item("artists-header") {
-                    SectionHeader(title = "Артисты, за которыми стоит наблюдать")
-                }
-                item("artists-list") {
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        items(state.artists, key = { it.id }) { artist ->
-                            ArtistTile(
-                                artist = artist,
-                                onClick = { onOpenArtist(artist.id) },
-                            )
-                        }
-                    }
-                }
-            }
+                // --- СКРОЛЛЯЩИЙСЯ КОНТЕНТ (Лента) ---
+                val trendingTracks = remember(state.trending) { state.trending.take(8) }
 
-            item("footer") {
-                Column(
+                LazyColumn(
+                    state = lazyListState, // Передаем стейт сюда!
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp, bottom = 4.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                        .fillMaxSize()
+                        .weight(1f)
+                        .nestedScroll(nestedScrollConnection),
+                    contentPadding = PaddingValues(bottom = 26.dp),
+                    verticalArrangement = Arrangement.spacedBy(18.dp),
                 ) {
-                    Text(
-                        text = "Работает от открытой сети Audius",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.alpha(0.7f) // ИСПРАВЛЕНО: Более идиоматичный способ изменения прозрачности
-                    )
+                    if (state.isLoading && state.tracks.isEmpty() && !isFirstLaunch.value) {
+                        item("loading") {
+                            Box(modifier = Modifier.padding(horizontal = 20.dp)) {
+                                LoadingState()
+                            }
+                        }
+                    } else if (state.error != null && state.tracks.isEmpty()) {
+                        item("error") {
+                            Box(modifier = Modifier.padding(horizontal = 20.dp)) {
+                                ErrorState(message = state.error.orEmpty(), onRetry = { onIntent(HomeIntent.Retry) })
+                            }
+                        }
+                    } else if (state.tracks.isEmpty() && !state.isLoading) {
+                        item("empty") {
+                            Box(modifier = Modifier.padding(horizontal = 20.dp)) {
+                                EmptyState(
+                                    title = "На циферблате ничего нет",
+                                    message = "Попробуйте другой жанр или обновите ленту.",
+                                    actionText = "Обновить",
+                                    onAction = { onIntent(HomeIntent.Retry) },
+                                )
+                            }
+                        }
+                    }
+
+                    val featured = state.featured
+                    if (featured != null) {
+                        item("featured") {
+                            Box(modifier = Modifier.padding(horizontal = 20.dp)) {
+                                FeaturedTrackCard(
+                                    track = featured,
+                                    isPlaying = state.currentTrackId == featured.id && state.isPlaying,
+                                    onClick = { onOpenTrack(featured.id) },
+                                    onPlay = { onIntent(HomeIntent.PlayFeatured) },
+                                )
+                            }
+                        }
+                    }
+
+                    item("explore") {
+                        Box(modifier = Modifier.padding(horizontal = 20.dp)) {
+                            Surface(
+                                onClick = onOpenExplore,
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(22.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+                            ) {
+                                Column(modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp)) {
+                                    Text(
+                                        text = "Обзор Audius",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                    )
+                                    Spacer(Modifier.height(4.dp))
+                                    Text(
+                                        text = "Плейлисты недели, андеграунд и новые имена открытой сети.",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    item("charts") {
+                        Box(modifier = Modifier.padding(horizontal = 20.dp)) {
+                            Surface(
+                                onClick = onOpenCharts,
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(22.dp),
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
+                            ) {
+                                Column(modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp)) {
+                                    Text(
+                                        text = "Чарты Audius",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                    )
+                                    Spacer(Modifier.height(4.dp))
+                                    Text(
+                                        text = "Топ недели, месяца и за всё время — с фильтром по жанрам.",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    if (trendingTracks.isNotEmpty()) {
+                        item("trending-header") {
+                            Box(modifier = Modifier.padding(horizontal = 20.dp)) {
+                                val selectedGenre = Genres.byApiName(state.selectedGenre)
+                                SectionHeader(
+                                    title = if (selectedGenre == null) "Сейчас это в тренде"
+                                    else "${selectedGenre.displayName}: самое горячее",
+                                    action = "Увидеть все",
+                                    onAction = {
+                                        if (selectedGenre == null) {
+                                            onOpenList("trending", "all", "Trending now")
+                                        } else {
+                                            onOpenList("genre", selectedGenre.apiName, selectedGenre.displayName)
+                                        }
+                                    },
+                                )
+                            }
+                        }
+                        items(trendingTracks, key = { it.id }) { track ->
+                            Box(modifier = Modifier.padding(horizontal = 20.dp)) {
+                                TrackRow(
+                                    track = track,
+                                    isActive = state.currentTrackId == track.id,
+                                    isPlaying = state.isPlaying,
+                                    isFavorite = state.favoriteIds.contains(track.id),
+                                    onClick = { onOpenTrack(track.id) },
+                                    onPlay = { onIntent(HomeIntent.PlayTrack(track)) },
+                                    onFavorite = { onIntent(HomeIntent.ToggleFavorite(track)) },
+                                )
+                            }
+                        }
+                    }
+
+                    if (state.freshDrops.isNotEmpty()) {
+                        item("fresh-header") {
+                            Box(modifier = Modifier.padding(horizontal = 20.dp)) {
+                                SectionHeader(title = "Свежие капли", action = "Исследовать") {
+                                    onOpenList("trending", "all", "Fresh drops")
+                                }
+                            }
+                        }
+                        item("fresh-list") {
+                            LazyRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentPadding = PaddingValues(horizontal = 20.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                items(state.freshDrops, key = { it.id }) { track ->
+                                    TrackTile(
+                                        track = track,
+                                        isActive = state.currentTrackId == track.id,
+                                        isPlaying = state.isPlaying,
+                                        onClick = { onOpenTrack(track.id) },
+                                        onPlay = { onIntent(HomeIntent.PlayTrack(track)) },
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    if (state.artists.isNotEmpty()) {
+                        item("artists-header") {
+                            Box(modifier = Modifier.padding(horizontal = 20.dp)) {
+                                SectionHeader(title = "Артисты, за которыми стоит наблюдать")
+                            }
+                        }
+                        item("artists-list") {
+                            LazyRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentPadding = PaddingValues(horizontal = 20.dp),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                items(state.artists, key = { it.id }) { artist ->
+                                    ArtistTile(
+                                        artist = artist,
+                                        onClick = { onOpenArtist(artist.id) },
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    item("footer") {
+                        Box(modifier = Modifier.padding(horizontal = 20.dp)) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 10.dp, bottom = 4.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Text(
+                                    text = "Работает от открытой сети Audius",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.alpha(0.7f)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

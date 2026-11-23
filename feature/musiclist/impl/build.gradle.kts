@@ -7,7 +7,9 @@ plugins {
 android {
     namespace = "com.sona.feature.musiclist.impl"
     compileSdk {
-        version = release(37)
+        version = release(37) {
+            minorApiLevel = 1
+        }
     }
 
     defaultConfig {

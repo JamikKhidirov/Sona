@@ -6,7 +6,9 @@ plugins {
 android {
     namespace = "com.sona.core.ui"
     compileSdk {
-        version = release(37)
+        version = release(37){
+            minorApiLevel = 1
+        }
     }
 
     defaultConfig {
@@ -34,8 +36,11 @@ dependencies {
     api(libs.coil.compose)
     api(project(":core:common"))
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.ui)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    debugImplementation(libs.androidx.ui.tooling)
 }
