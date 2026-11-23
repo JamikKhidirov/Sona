@@ -5,7 +5,7 @@ import com.sona.core.audio.PlayerState
 import com.sona.core.common.domain.repository.LibraryRepository
 import com.sona.core.common.domain.repository.MusicRepository
 import com.sona.core.common.domain.usecase.library.ObserveFavoriteIds
-import com.sona.core.common.domain.usecase.SearchCatalog
+import com.sona.core.common.domain.usecase.music.SearchCatalog
 import com.sona.core.common.domain.usecase.library.ToggleFavorite
 import com.sona.core.common.model.Artist
 import com.sona.core.common.model.Playlist

@@ -229,7 +229,14 @@ private fun SearchScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .nestedScroll(nestedScrollConnection),
-                    onGenreClick = { onIntent(SearchIntent.BrowseGenre(it)) },
+                    onGenreClick = { genre ->
+                        onIntent(
+                            SearchIntent.BrowseGenre(
+                                genre = genre.apiName,
+                                displayName = genre.displayName,
+                            ),
+                        )
+                    },
                 )
             } else {
                 SearchResults(

@@ -8,6 +8,7 @@ import com.sona.core.common.domain.usecase.library.ToggleFavorite
 import com.sona.core.common.domain.usecase.music.GetArtistTracks
 import com.sona.core.common.domain.usecase.music.GetPlaylistTracks
 import com.sona.core.common.domain.usecase.music.GetTrendingTracks
+import com.sona.core.common.domain.usecase.music.GetUndergroundTracks
 import intent.MusicListIntent
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -27,6 +28,7 @@ class MusicListViewModel @Inject constructor(
     private val getTrendingTracks: GetTrendingTracks,
     private val getArtistTracks: GetArtistTracks,
     private val getPlaylistTracks: GetPlaylistTracks,
+    private val getUndergroundTracks: GetUndergroundTracks,
     private val observeFavoriteIds: ObserveFavoriteIds,
     private val toggleFavorite: ToggleFavorite,
     private val audioPlayer: AudioPlayer,
@@ -116,6 +118,7 @@ class MusicListViewModel @Inject constructor(
                 "genre" -> getTrendingTracks(genre = id, limit = 100)
                 "artist" -> getArtistTracks(id)
                 "playlist" -> getPlaylistTracks(id)
+                "underground" -> getUndergroundTracks(limit = 100)
                 else -> getTrendingTracks(genre = null, limit = 100)
             }
 

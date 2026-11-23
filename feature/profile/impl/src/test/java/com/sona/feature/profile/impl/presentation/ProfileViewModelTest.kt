@@ -9,7 +9,7 @@ import com.sona.core.common.domain.repository.SettingsRepository
 import com.sona.core.common.domain.usecase.music.GetCurrentUser
 import com.sona.core.common.domain.usecase.library.ObserveFavorites
 import com.sona.core.common.domain.usecase.library.ObserveRecentlyPlayed
-import com.sona.core.common.domain.usecase.ObserveSettings
+import com.sona.core.common.domain.usecase.settings.ObserveSettings
 import com.sona.core.common.model.Artist
 import com.sona.core.common.model.Playlist
 import com.sona.core.common.model.SearchResult
@@ -106,7 +106,10 @@ class ProfileViewModelTest {
             viewModel.onIntent(ProfileIntent.Refresh)
             advanceUntilIdle()
 
-            assertEquals("Couldn't load your Audius profile.", viewModel.state.value.error)
+            assertEquals(
+                "Не удалось загрузить ваш профиль Audius.",
+                viewModel.state.value.error,
+            )
         }
 
     @Test

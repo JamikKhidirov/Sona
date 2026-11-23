@@ -34,8 +34,11 @@ dependencies {
     api(libs.coil.compose)
     api(project(":core:common"))
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.ui)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    debugImplementation(libs.androidx.ui.tooling)
 }

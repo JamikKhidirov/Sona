@@ -2,9 +2,11 @@ package com.sona.core.network.audius.mapper
 
 import com.sona.core.common.model.Artist
 import com.sona.core.common.model.Artwork
+import com.sona.core.common.model.Comment
 import com.sona.core.common.model.Playlist
 import com.sona.core.common.model.Track
 import com.sona.core.network.audius.dto.ArtworkDto
+import com.sona.core.network.audius.dto.CommentDto
 import com.sona.core.network.audius.dto.PlaylistDto
 import com.sona.core.network.audius.dto.TrackDto
 import com.sona.core.network.audius.dto.UserDto
@@ -27,7 +29,10 @@ fun UserDto.toDomain(): Artist = Artist(
     coverUrl = coverPhoto.toDomain()?.bestUrl(),
     bio = bio,
     followerCount = followerCount ?: 0L,
+    followingCount = followeeCount ?: 0L,
     trackCount = trackCount ?: 0L,
+    playlistCount = playlistCount ?: 0L,
+    location = location,
     isVerified = isVerified == true,
 )
 
@@ -61,5 +66,22 @@ fun PlaylistDto.toDomain(): Playlist = Playlist(
     trackCount = trackCount ?: tracks?.size ?: 0,
     playCount = playCount ?: 0L,
     isAlbum = isAlbum == true,
+    ownerId = user?.id,
+    permalink = permalink,
     tracks = tracks.orEmpty().mapNotNull { it.toDomainOrNull() },
 )
+
+fun CommentDto.toDomainOrNull(): Comment? {
+    val commentId = id ?: return null
+    val text = message?.takeIf { it.isNotBlank() } ?: return null
+    return Comment(
+        id = commentId,
+        message = text,
+        author = user?.toDomain() ?: UnknownArtist,
+        createdAt = createdAt,
+        replyCount = replyCount ?: 0,
+        reactCount = reactCount ?: 0,
+        isReacted = isReacted == true,
+        isEdited = isEdited == true,
+    )
+}

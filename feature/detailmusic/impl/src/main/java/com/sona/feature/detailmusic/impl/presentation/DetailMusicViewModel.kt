@@ -5,11 +5,15 @@ import androidx.lifecycle.viewModelScope
 import com.sona.core.audio.AudioPlayer
 import com.sona.core.common.domain.usecase.library.ObserveFavorites
 import com.sona.core.common.domain.usecase.library.ToggleFavorite
+import com.sona.core.common.domain.usecase.music.GetRelatedTracks
 import com.sona.core.common.domain.usecase.music.GetTrack
+import com.sona.core.common.domain.usecase.music.GetTrackRemixes
 import com.sona.core.common.domain.usecase.music.GetTrendingTracks
 import com.sona.core.common.model.Track
 import intent.DetailMusicIntent
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -26,6 +30,8 @@ import javax.inject.Inject
 class DetailMusicViewModel @Inject constructor(
     private val getTrack: GetTrack,
     private val getTrendingTracks: GetTrendingTracks,
+    private val getRelatedTracks: GetRelatedTracks,
+    private val getTrackRemixes: GetTrackRemixes,
     private val observeFavorites: ObserveFavorites,
     private val toggleFavorite: ToggleFavorite,
     private val audioPlayer: AudioPlayer,
@@ -127,12 +133,28 @@ class DetailMusicViewModel @Inject constructor(
         }
     }
 
-    private suspend fun loadRelated(track: Track) {
-        getTrendingTracks(genre = track.genre, limit = 12)
-            .onSuccess { tracks ->
-                _state.update {
-                    it.copy(related = tracks.filterNot { related -> related.id == track.id }.take(10))
-                }
-            }
+    private suspend fun loadRelated(track: Track) = supervisorScope {
+        val relatedDeferred = async { getRelatedTracks(track.id, limit = 12) }
+        val remixesDeferred = async { getTrackRemixes(track.id, limit = 10) }
+
+        val relatedFromApi = relatedDeferred.await().getOrNull().orEmpty()
+        val relatedTracks = relatedFromApi.ifEmpty {
+            getTrendingTracks(genre = track.genre, limit = 12).getOrDefault(emptyList())
+        }
+
+        val remixes = remixesDeferred.await().getOrDefault(emptyList())
+
+        _state.update {
+            it.copy(
+                related = relatedTracks
+                    .filterNot { related -> related.id == track.id }
+                    .distinctBy { related -> related.id }
+                    .take(10),
+                remixes = remixes
+                    .filterNot { remix -> remix.id == track.id }
+                    .distinctBy { remix -> remix.id }
+                    .take(10),
+            )
+        }
     }
 }

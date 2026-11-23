@@ -25,6 +25,7 @@ data class UserDto(
     @SerializedName("track_count") val trackCount: Long? = null,
     @SerializedName("playlist_count") val playlistCount: Long? = null,
     @SerializedName("is_verified") val isVerified: Boolean? = null,
+    @SerializedName("does_current_user_follow") val isFollowing: Boolean? = null,
     @SerializedName("location") val location: String? = null,
 )
 

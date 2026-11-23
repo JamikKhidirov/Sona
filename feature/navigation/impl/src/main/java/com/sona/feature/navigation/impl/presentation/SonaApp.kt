@@ -26,8 +26,24 @@ import androidx.navigation.navArgument
 import com.sona.core.ui.component.MiniPlayer
 import com.sona.core.ui.component.SonaBackground
 import com.sona.core.ui.theme.SonaTheme
+import com.sona.feature.artist.api.ArtistDestination
+import com.sona.feature.artist.impl.presentation.ArtistRoute
+import com.sona.feature.artistcommunity.api.ArtistCommunityDestination
+import com.sona.feature.artistcommunity.impl.presentation.ArtistCommunityRoute
+import com.sona.feature.artistfavorites.api.ArtistFavoritesDestination
+import com.sona.feature.artistfavorites.impl.presentation.ArtistFavoritesRoute
+import com.sona.feature.charts.api.ChartsDestination
+import com.sona.feature.charts.impl.presentation.ChartsRoute
+import com.sona.feature.comments.api.CommentsDestination
+import com.sona.feature.comments.impl.presentation.CommentsRoute
 import com.sona.feature.detailmusic.api.DetailMusicDestination
 import com.sona.feature.detailmusic.impl.presentation.DetailMusicRoute
+import com.sona.feature.explore.api.ExploreDestination
+import com.sona.feature.explore.impl.presentation.ExploreRoute
+import com.sona.feature.playlistdetail.api.PlaylistDetailDestination
+import com.sona.feature.playlistdetail.impl.presentation.PlaylistDetailRoute
+import com.sona.feature.tracktools.api.TrackToolsDestination
+import com.sona.feature.tracktools.impl.presentation.TrackToolsRoute
 import com.sona.feature.favorites.api.FavoritesDestination
 import com.sona.feature.favorites.impl.presentation.FavoritesRoute
 import com.sona.feature.home.api.HomeDestination
@@ -136,6 +152,11 @@ fun SonaApp(
                                     MusicListDestination.createRoute(source, id, title),
                                 )
                             },
+                            onOpenArtist = { id ->
+                                navController.navigate(ArtistDestination.createRoute(id))
+                            },
+                            onOpenExplore = { navController.navigate(ExploreDestination.ROUTE) },
+                            onOpenCharts = { navController.navigate(ChartsDestination.ROUTE) },
                             onOpenSearch = { navigateTopLevel(SearchDestination.ROUTE) },
                             onOpenSettings = { navController.navigate(SettingsDestination.ROUTE) },
                         )
@@ -147,15 +168,11 @@ fun SonaApp(
                             onOpenTrack = { trackId ->
                                 navController.navigate(DetailMusicDestination.createRoute(trackId))
                             },
-                            onOpenArtist = { id, name ->
-                                navController.navigate(
-                                    MusicListDestination.createRoute("artist", id, name),
-                                )
+                            onOpenArtist = { id, _ ->
+                                navController.navigate(ArtistDestination.createRoute(id))
                             },
                             onOpenPlaylist = { id, name ->
-                                navController.navigate(
-                                    MusicListDestination.createRoute("playlist", id, name),
-                                )
+                                navController.navigate(PlaylistDetailDestination.createRoute(id))
                             },
                         )
                     }
@@ -205,10 +222,169 @@ fun SonaApp(
                             onOpenTrack = { id ->
                                 navController.navigate(DetailMusicDestination.createRoute(id))
                             },
-                            onOpenArtist = { id, name ->
-                                navController.navigate(
-                                    MusicListDestination.createRoute("artist", id, name),
-                                )
+                            onOpenArtist = { id, _ ->
+                                navController.navigate(ArtistDestination.createRoute(id))
+                            },
+                            onOpenComments = { id ->
+                                navController.navigate(CommentsDestination.createRoute(id))
+                            },
+                            onOpenTools = { id ->
+                                navController.navigate(TrackToolsDestination.createRoute(id))
+                            },
+                        )
+                    }
+
+                    composable(
+                        route = ArtistDestination.ROUTE,
+                        arguments = listOf(
+                            navArgument(ArtistDestination.ARG_ARTIST_ID) {
+                                type = NavType.StringType
+                            },
+                        ),
+                    ) { entry ->
+                        ArtistRoute(
+                            viewModelFactory = viewModelFactory,
+                            artistId = entry.arguments
+                                ?.getString(ArtistDestination.ARG_ARTIST_ID)
+                                .orEmpty(),
+                            onBack = { navController.popBackStack() },
+                            onOpenTrack = { trackId ->
+                                navController.navigate(DetailMusicDestination.createRoute(trackId))
+                            },
+                            onOpenPlaylist = { id, title ->
+                                navController.navigate(PlaylistDetailDestination.createRoute(id))
+                            },
+                            onOpenArtist = { id, _ ->
+                                navController.navigate(ArtistDestination.createRoute(id))
+                            },
+                            onOpenCommunity = { id ->
+                                navController.navigate(ArtistCommunityDestination.createRoute(id))
+                            },
+                            onOpenFavorites = { id ->
+                                navController.navigate(ArtistFavoritesDestination.createRoute(id))
+                            },
+                        )
+                    }
+
+                    composable(
+                        route = CommentsDestination.ROUTE,
+                        arguments = listOf(
+                            navArgument(CommentsDestination.ARG_TRACK_ID) {
+                                type = NavType.StringType
+                            },
+                        ),
+                    ) { entry ->
+                        CommentsRoute(
+                            viewModelFactory = viewModelFactory,
+                            trackId = entry.arguments
+                                ?.getString(CommentsDestination.ARG_TRACK_ID)
+                                .orEmpty(),
+                            onBack = { navController.popBackStack() },
+                        )
+                    }
+
+                    composable(ExploreDestination.ROUTE) {
+                        ExploreRoute(
+                            viewModelFactory = viewModelFactory,
+                            onBack = { navController.popBackStack() },
+                            onOpenTrack = { trackId ->
+                                navController.navigate(DetailMusicDestination.createRoute(trackId))
+                            },
+                            onOpenPlaylist = { id, title ->
+                                navController.navigate(PlaylistDetailDestination.createRoute(id))
+                            },
+                        )
+                    }
+
+                    composable(ChartsDestination.ROUTE) {
+                        ChartsRoute(
+                            viewModelFactory = viewModelFactory,
+                            onBack = { navController.popBackStack() },
+                            onOpenTrack = { trackId ->
+                                navController.navigate(DetailMusicDestination.createRoute(trackId))
+                            },
+                        )
+                    }
+
+                    composable(
+                        route = PlaylistDetailDestination.ROUTE,
+                        arguments = listOf(
+                            navArgument(PlaylistDetailDestination.ARG_PLAYLIST_ID) {
+                                type = NavType.StringType
+                            },
+                        ),
+                    ) { entry ->
+                        PlaylistDetailRoute(
+                            viewModelFactory = viewModelFactory,
+                            playlistId = entry.arguments
+                                ?.getString(PlaylistDetailDestination.ARG_PLAYLIST_ID)
+                                .orEmpty(),
+                            onBack = { navController.popBackStack() },
+                            onOpenTrack = { trackId ->
+                                navController.navigate(DetailMusicDestination.createRoute(trackId))
+                            },
+                            onOpenArtist = { id, _ ->
+                                navController.navigate(ArtistDestination.createRoute(id))
+                            },
+                        )
+                    }
+
+                    composable(
+                        route = ArtistCommunityDestination.ROUTE,
+                        arguments = listOf(
+                            navArgument(ArtistCommunityDestination.ARG_ARTIST_ID) {
+                                type = NavType.StringType
+                            },
+                        ),
+                    ) { entry ->
+                        ArtistCommunityRoute(
+                            viewModelFactory = viewModelFactory,
+                            artistId = entry.arguments
+                                ?.getString(ArtistCommunityDestination.ARG_ARTIST_ID)
+                                .orEmpty(),
+                            onBack = { navController.popBackStack() },
+                            onOpenArtist = { id, _ ->
+                                navController.navigate(ArtistDestination.createRoute(id))
+                            },
+                        )
+                    }
+
+                    composable(
+                        route = ArtistFavoritesDestination.ROUTE,
+                        arguments = listOf(
+                            navArgument(ArtistFavoritesDestination.ARG_ARTIST_ID) {
+                                type = NavType.StringType
+                            },
+                        ),
+                    ) { entry ->
+                        ArtistFavoritesRoute(
+                            viewModelFactory = viewModelFactory,
+                            artistId = entry.arguments
+                                ?.getString(ArtistFavoritesDestination.ARG_ARTIST_ID)
+                                .orEmpty(),
+                            onBack = { navController.popBackStack() },
+                            onOpenTrack = { trackId ->
+                                navController.navigate(DetailMusicDestination.createRoute(trackId))
+                            },
+                        )
+                    }
+
+                    composable(
+                        route = TrackToolsDestination.ROUTE,
+                        arguments = listOf(
+                            navArgument(TrackToolsDestination.ARG_TRACK_ID) {
+                                type = NavType.StringType
+                            },
+                        ),
+                    ) { entry ->
+                        TrackToolsRoute(
+                            viewModelFactory = viewModelFactory,
+                            trackId = entry.arguments
+                                ?.getString(TrackToolsDestination.ARG_TRACK_ID)
+                                .orEmpty(),
+                            onBack = { navController.popBackStack() },
+                            onOpenTrack = { trackId ->
+                                navController.navigate(DetailMusicDestination.createRoute(trackId))
                             },
                         )
                     }
