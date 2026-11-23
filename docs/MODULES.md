@@ -91,7 +91,14 @@ Sona/
     ├── musiclist/{api,impl}/         :feature:musiclist:api / :impl
     ├── player/{api,impl}/            :feature:player:api / :impl
     ├── settings/{api,impl}/          :feature:settings:api / :impl
-    └── comments/{api,impl}/          :feature:comments:api / :impl
+    ├── artist/{api,impl}/            :feature:artist:api / :impl
+    ├── comments/{api,impl}/          :feature:comments:api / :impl
+    ├── explore/{api,impl}/           :feature:explore:api / :impl
+    ├── charts/{api,impl}/            :feature:charts:api / :impl
+    ├── playlistdetail/{api,impl}/    :feature:playlistdetail:api / :impl
+    ├── artistcommunity/{api,impl}/   :feature:artistcommunity:api / :impl
+    ├── artistfavorites/{api,impl}/   :feature:artistfavorites:api / :impl
+    └── tracktools/{api,impl}/        :feature:tracktools:api / :impl
 ```
 
 ---
@@ -120,9 +127,9 @@ Compose-экранов.
 
 | Пакет | Содержимое |
 |---|---|
-| `model` | `Track`, `Artist`, `Playlist`, `SearchResult`, `Genres`, `AudiusConfig`, `ThemeMode`, `RepeatMode` |
-| `domain/repository` | `MusicRepository`, `LibraryRepository`, `SettingsRepository` |
-| `domain/usecase` | `GetTrendingTracks`, `SearchCatalog`, `GetTrack`, `GetArtist`, `GetArtistTracks`, `GetPlaylist`, `GetPlaylistTracks`, `GetCurrentUser`, `ToggleFavorite`, `ObserveFavorites`, `ObserveFavoriteIds`, `ObserveRecentlyPlayed`, `AddRecentlyPlayed`, `ObserveSettings`, `SetThemeMode`, `SetApiToken`, `ClearLibrary` |
+| `model` | `Track`, `Artist`, `Playlist`, `Comment`, `ArtistCatalog`, `SearchResult`, `Genres`, `AudiusConfig`, `ThemeMode`, `RepeatMode` |
+| `domain/repository` | `MusicRepository`, `ArtistRepository`, `CommentRepository`, `DiscoveryRepository`, `LibraryRepository`, `SettingsRepository` |
+| `domain/usecase` | `GetTrendingTracks`, `GetTrendingPlaylists`, `GetUndergroundTracks`, `GetRelatedTracks`, `GetTrackRemixes`, `GetTrackStems`, `SearchCatalog`, `GetTrack`, `GetArtist`, `GetArtistCatalog`, `GetArtistTracks`, `GetArtistFollowers`, `GetArtistFollowing`, `GetArtistFavorites`, `GetPlaylist`, `GetPlaylistTracks`, `GetPlaylistFavorites`, `TogglePlaylistFavorite`, `ToggleFollow`, `GetTrackComments`, `PostTrackComment`, `GetCurrentUser`, `ToggleFavorite`, `ObserveFavorites`, `ObserveFavoriteIds`, `ObserveRecentlyPlayed`, `AddRecentlyPlayed`, `ObserveSettings`, `SetThemeMode`, `SetApiToken`, `ClearLibrary` |
 | `data/repository` | `LibraryRepositoryImpl`, `SettingsRepositoryImpl` |
 | `local` | `SonaPreferences` — DataStore `sona_prefs` |
 | `auth` | `TokenProvider` |
@@ -167,16 +174,19 @@ Android-библиотека `com.sona.core.network.audius`.
 
 ```text
 api/          TrackApi, PlaylistApi, UserApi, SearchApi
-di/           NetworkModule, ApiModule, MusicModule
+di/           NetworkModule, ApiModule, MusicModule, CatalogModule
 dto/          TrackDto, UserDto, PlaylistDto, CommentDto, envelope
 mapper/       toDomain / toDomainOrNull
 interceptor/  AuthInterceptor
 model/        SortMethod, SortDirection, FilterTracks, SortAi
-repository/   MusicRepositoryImpl
+repository/   MusicRepositoryImpl, ArtistRepositoryImpl,
+              CommentRepositoryImpl, DiscoveryRepositoryImpl
 ```
 
 `NetworkModule` даёт `Gson`, `OkHttpClient`, `Retrofit`; `ApiModule` — четыре API;
-`MusicModule` биндит `MusicRepositoryImpl` на `MusicRepository`.
+`MusicModule` биндит `MusicRepositoryImpl` на `MusicRepository`;
+`CatalogModule` биндит `ArtistRepository`, `CommentRepository` и
+`DiscoveryRepository` на их реализации.
 
 ### :core:network:firebase:auth, :core:network:supabase:auth
 
@@ -319,7 +329,14 @@ Android-контекста и мог тестироваться с фейком.
 | `musiclist` | `MusicListDestination` | `MusicListScreen`, `MusicListViewModel`, `CollectionHero` |
 | `player` | `PlayerDestination` | `PlayerScreen`, `PlayerViewModel`, `PlayerComponents` |
 | `settings` | `SettingsDestination` | `SettingsScreen`, `SettingsViewModel`, `SettingsComponents` |
-| `comments` | `CommentData` | заготовка |
+| `artist` | `ArtistDestination` | `ArtistScreen`, `ArtistViewModel`, `ArtistHero` |
+| `comments` | `CommentsDestination` | `CommentsScreen`, `CommentsViewModel` |
+| `explore` | `ExploreDestination` | `ExploreScreen`, `ExploreViewModel` |
+| `charts` | `ChartsDestination` | `ChartsScreen`, `ChartsViewModel` |
+| `playlistdetail` | `PlaylistDetailDestination` | `PlaylistDetailScreen`, `PlaylistDetailViewModel` |
+| `artistcommunity` | `ArtistCommunityDestination` | `ArtistCommunityScreen`, `ArtistCommunityViewModel` |
+| `artistfavorites` | `ArtistFavoritesDestination` | `ArtistFavoritesScreen`, `ArtistFavoritesViewModel` |
+| `tracktools` | `TrackToolsDestination` | `TrackToolsScreen`, `TrackToolsViewModel` |
 
 ### Почему `api` — JVM-модуль
 

@@ -7,7 +7,9 @@ plugins {
 android {
     namespace = "com.sona.music"
     compileSdk {
-        version = release(37)
+        version = release(37) {
+            minorApiLevel = 1
+        }
     }
 
     defaultConfig {
@@ -57,6 +59,14 @@ dependencies {
     implementation(project(":feature:detailmusic:impl"))
     implementation(project(":feature:musiclist:impl"))
     implementation(project(":feature:player:impl"))
+    implementation(project(":feature:artist:impl"))
+    implementation(project(":feature:comments:impl"))
+    implementation(project(":feature:explore:impl"))
+    implementation(project(":feature:charts:impl"))
+    implementation(project(":feature:playlistdetail:impl"))
+    implementation(project(":feature:artistcommunity:impl"))
+    implementation(project(":feature:artistfavorites:impl"))
+    implementation(project(":feature:tracktools:impl"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)

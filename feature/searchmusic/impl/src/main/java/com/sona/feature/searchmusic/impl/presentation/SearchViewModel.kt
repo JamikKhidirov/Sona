@@ -23,10 +23,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@OptIn(FlowPreview::class)
 class SearchViewModel @Inject constructor(
     private val searchCatalog: SearchCatalog,
-    private val observeFavoriteIds: ObserveFavoriteIds,
+    observeFavoriteIds: ObserveFavoriteIds,
     private val toggleFavorite: ToggleFavorite,
     private val audioPlayer: AudioPlayer,
 ) : ViewModel() {
@@ -96,10 +95,11 @@ class SearchViewModel @Inject constructor(
                 )
             }
             is SearchIntent.BrowseGenre -> {
-                _state.update { it.copy(query = intent.genre) }
+                // Show the localized label, but search Audius with its English name.
+                _state.update { it.copy(query = intent.displayName) }
                 queryFlow.value = intent.genre
             }
-            SearchIntent.Retry -> performSearch(_state.value.query.trim())
+            SearchIntent.Retry -> performSearch(queryFlow.value.trim())
             SearchIntent.ClearQuery -> {
                 _state.update { it.copy(query = "") }
                 queryFlow.value = ""

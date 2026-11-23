@@ -7,7 +7,9 @@ plugins {
 android {
     namespace = "com.sona.feature.home.impl"
     compileSdk {
-        version = release(37)
+        version = release(37) {
+            minorApiLevel = 1
+        }
     }
 
     defaultConfig {
@@ -39,7 +41,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.material3)
+
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.javax.inject)
     implementation(libs.dagger)

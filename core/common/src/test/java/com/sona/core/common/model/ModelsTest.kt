@@ -128,9 +128,17 @@ class ModelsTest {
         assertEquals(12, Genres.all.size)
         assertEquals("Lo-Fi", Genres.byName("lo-fi")?.name)
         assertEquals("Lo-Fi", Genres.byName("LO-FI")?.name)
+        assertEquals("Lo-Fi", Genres.byName("lo-fi")?.apiName)
         assertNull(Genres.byName("Polka"))
         assertNull(Genres.byName(null))
         assertTrue(Genres.all.all { it.emoji.isNotBlank() })
+        assertTrue(Genres.all.all { it.displayName.isNotBlank() })
+        // The API value stays English while the user sees the Russian label.
+        assertEquals("Электроника", Genres.byApiName("electronic")?.displayName)
+        assertEquals("Поп", Genres.displayNameOf("Pop"))
+        assertEquals("Хип-хоп/Рэп", Genres.byName("Хип-хоп/Рэп")?.displayName)
+        assertEquals("Hip-Hop/Rap", Genres.byName("Хип-хоп/Рэп")?.apiName)
+        assertNull(Genres.byApiName("Поп"))
     }
 
     @Test

@@ -36,6 +36,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sona.core.common.model.Genre
 import com.sona.core.common.model.Genres
 
 private val GenreGradients = listOf(
@@ -100,7 +101,7 @@ fun SearchField(
 @Composable
 fun BrowseGenres(
     modifier: Modifier = Modifier,
-    onGenreClick: (String) -> Unit,
+    onGenreClick: (Genre) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier,
@@ -120,11 +121,11 @@ fun BrowseGenres(
                 row.forEach { genre ->
                     val gradient = GenreGradients[(Genres.all.indexOf(genre)) % GenreGradients.size]
                     GenreCard(
-                        name = genre.name,
+                        name = genre.displayName,
                         emoji = genre.emoji,
                         colors = gradient,
                         modifier = Modifier.weight(1f),
-                        onClick = { onGenreClick(genre.name) },
+                        onClick = { onGenreClick(genre) },
                     )
                 }
                 if (row.size == 1) Spacer(Modifier.weight(1f))

@@ -6,7 +6,9 @@ plugins {
 android {
     namespace = "com.sona.core.audio.impl"
     compileSdk {
-        version = release(37)
+        version = release(37) {
+            minorApiLevel = 1
+        }
     }
 
     defaultConfig {
@@ -31,6 +33,8 @@ dependencies {
     implementation(libs.javax.inject)
     implementation(libs.dagger)
     ksp(libs.dagger.compiler)
+    // Media3 core (обязательно)
+    
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

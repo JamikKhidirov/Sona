@@ -2,15 +2,23 @@ package com.sona.music.di
 
 import androidx.lifecycle.ViewModel
 import com.sona.core.common.di.ViewModelKey
+import com.sona.feature.artist.impl.presentation.ArtistViewModel
+import com.sona.feature.artistcommunity.impl.presentation.ArtistCommunityViewModel
+import com.sona.feature.artistfavorites.impl.presentation.ArtistFavoritesViewModel
+import com.sona.feature.charts.impl.presentation.ChartsViewModel
+import com.sona.feature.comments.impl.presentation.CommentsViewModel
 import com.sona.feature.detailmusic.impl.presentation.DetailMusicViewModel
+import com.sona.feature.explore.impl.presentation.ExploreViewModel
 import com.sona.feature.favorites.impl.presentation.FavoritesViewModel
 import com.sona.feature.home.impl.presentation.HomeViewModel
 import com.sona.feature.musiclist.impl.presentation.MusicListViewModel
 import com.sona.feature.navigation.impl.presentation.AppViewModel
 import com.sona.feature.player.impl.presentation.PlayerViewModel
+import com.sona.feature.playlistdetail.impl.presentation.PlaylistDetailViewModel
 import com.sona.feature.profile.impl.presentation.ProfileViewModel
 import com.sona.feature.searchmusic.impl.presentation.SearchViewModel
 import com.sona.feature.settings.impl.presentation.SettingsViewModel
+import com.sona.feature.tracktools.impl.presentation.TrackToolsViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
@@ -62,4 +70,44 @@ abstract class ViewModelBindingModule {
     @IntoMap
     @ViewModelKey(PlayerViewModel::class)
     abstract fun bindPlayerViewModel(viewModel: PlayerViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(ArtistViewModel::class)
+    abstract fun bindArtistViewModel(viewModel: ArtistViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(CommentsViewModel::class)
+    abstract fun bindCommentsViewModel(viewModel: CommentsViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(ExploreViewModel::class)
+    abstract fun bindExploreViewModel(viewModel: ExploreViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(ChartsViewModel::class)
+    abstract fun bindChartsViewModel(viewModel: ChartsViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(PlaylistDetailViewModel::class)
+    abstract fun bindPlaylistDetailViewModel(viewModel: PlaylistDetailViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(ArtistCommunityViewModel::class)
+    abstract fun bindArtistCommunityViewModel(viewModel: ArtistCommunityViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(ArtistFavoritesViewModel::class)
+    abstract fun bindArtistFavoritesViewModel(viewModel: ArtistFavoritesViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(TrackToolsViewModel::class)
+    abstract fun bindTrackToolsViewModel(viewModel: TrackToolsViewModel): ViewModel
 }
