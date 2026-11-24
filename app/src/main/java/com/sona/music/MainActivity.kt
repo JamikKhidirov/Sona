@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         requestNotificationPermission()
-        keepPlaybackServiceAlive()
+
 
         val factory = (application as SonaApplication).appComponent.viewModelFactory()
         setContent {

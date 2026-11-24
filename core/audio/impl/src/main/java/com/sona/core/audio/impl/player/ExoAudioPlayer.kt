@@ -208,6 +208,7 @@ class ExoAudioPlayer @Inject constructor(
         scope.launch { addRecentlyPlayed(track) }
     }
 
+    // 🔑 ИСПРАВЛЕНО: Добавлен mediaType = MUSIC для правильного уведомления
     private fun toMediaItem(track: Track): MediaItem = MediaItem.Builder()
         .setMediaId(track.id)
         .setUri(track.streamUrl)
@@ -215,6 +216,7 @@ class ExoAudioPlayer @Inject constructor(
             MediaMetadata.Builder()
                 .setTitle(track.title)
                 .setArtist(track.artistName)
+                .setMediaType(MediaMetadata.MEDIA_TYPE_MUSIC) // 🔑 ВАЖНО!
                 .apply { track.artworkUrl?.let { setArtworkUri(it.toUri()) } }
                 .build(),
         )

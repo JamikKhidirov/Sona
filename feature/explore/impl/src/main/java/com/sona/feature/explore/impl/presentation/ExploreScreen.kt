@@ -1,6 +1,7 @@
 package com.sona.feature.explore.impl.presentation
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -146,10 +147,12 @@ private fun ExploreScreen(
             Spacer(Modifier.height(6.dp))
         }
 
-        Box(modifier = Modifier.weight(1f)) {
+        Box(modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center) {
             when {
                 state.isLoading && state.itemsCount == 0 -> LoadingState(
                     label = "Собираем подборку…",
+                    modifier = Modifier.fillMaxSize()
                 )
                 state.error != null && state.itemsCount == 0 -> ErrorState(
                     message = state.error,
