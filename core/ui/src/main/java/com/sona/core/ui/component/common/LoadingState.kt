@@ -34,7 +34,7 @@ fun LoadingState(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         AndroidView(
-            modifier = modifier.size(34.dp),
+            modifier = modifier.size(64.dp),
             factory = { context ->
                 LayoutInflater
                     .from(context)
