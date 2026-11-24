@@ -56,19 +56,14 @@ class PlaybackService : MediaSessionService() {
         mediaSession = MediaSession.Builder(this, player)
             .apply { sessionActivity?.let(::setSessionActivity) }
             .build()
+
+        addSession(mediaSession!!)
+        setShowNotificationForIdlePlayer(SHOW_NOTIFICATION_FOR_IDLE_PLAYER_ALWAYS)
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? =
         mediaSession
 
-    // 4. ВАЖНО: Форсируем показ уведомления сразу
-    override fun onUpdateNotification(
-        session: MediaSession,
-        startInForegroundRequired: Boolean
-    ) {
-        // Возвращаем FOREGROUND_SERVICE_IMMEDIATE — уведомление появится сразу
-        return super.onUpdateNotification(session, true)
-    }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         // Останавливаем сервис только если ничего не играет

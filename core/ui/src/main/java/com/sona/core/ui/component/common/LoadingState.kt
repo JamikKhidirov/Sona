@@ -3,8 +3,10 @@ package com.sona.core.ui.component.common
 import android.R.attr.indeterminateDuration
 import android.view.LayoutInflater
 import android.widget.ProgressBar
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -29,9 +31,9 @@ fun LoadingState(
 ) {
     Column(
         modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 56.dp),
+            .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         AndroidView(
             modifier = modifier.size(64.dp),
